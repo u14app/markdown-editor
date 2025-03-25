@@ -1,0 +1,58 @@
+{
+  "name": "@xiangfa/mdeditor",
+  "description": "A Markdown editor with built-in syntax highlighting based on CodeMirror.",
+  "version": "0.1.8",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/u14app/markdown-editor.git"
+  },
+  "keywords": [
+    "markdown",
+    "markdown editor",
+    "editor"
+  ],
+  "sideEffects": false,
+  "main": "./lib/esm/index.esm.js",
+  "module": "dist/index.mjs",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/esm/index.esm.js",
+      "require": "./lib/cjs/index.cjs.js",
+      "default": "./lib/esm/index.esm.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "scripts": {
+    "start": "vite",
+    "tsc": "tsc --noEmit",
+    "build": "rimraf './lib' && tsc --emitDeclarationOnly && vite build"
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.8.0",
+    "@codemirror/lang-markdown": "^6.3.2",
+    "@codemirror/language": "^6.11.0",
+    "@codemirror/language-data": "^6.5.1",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.36.4",
+    "@lezer/highlight": "^1.2.1",
+    "codemirror": "^6.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.13",
+    "rimraf": "^6.0.1",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
+  }
+}

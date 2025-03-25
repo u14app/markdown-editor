@@ -1,0 +1,6 @@
+src/*
+.gitignore
+index.html
+tsconfig.json
+vite.config.ts
+pnpm-lock.yaml
