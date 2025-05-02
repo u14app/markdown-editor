@@ -32,6 +32,9 @@ importers:
       codemirror:
         specifier: ^6.0.1
         version: 6.0.1
+      codemirror-markdown-commands:
+        specifier: ^0.1.0
+        version: 0.1.0
     devDependencies:
       '@types/node':
         specifier: ^22.13.13
@@ -470,6 +473,9 @@ packages:
 
   brace-expansion@2.0.1:
     resolution: {integrity: sha512-XnAIvQ8eM+kC6aULx6wuQiwVsnzsi9d3WxzV3FpWTGA19F621kwdbsAcFKXgKUHZWsy+mY6iL1sHTxWEFCytDA==}
+
+  codemirror-markdown-commands@0.1.0:
+    resolution: {integrity: sha512-be/h9E0ZOezWvTSP14rZ2ZTtLYUadyL8hbziVn6p62pCCo0GTecrymo35wQzs+44ubigcKNnyo0giiOW9gIsKw==}
 
   codemirror@6.0.1:
     resolution: {integrity: sha512-J8j+nZ+CdWmIeFIGXEFbFPtpiYacFMDR8GlHK3IyHQJMCaVRfGx9NT+Hxivv1ckLWPvNdZqndbr/7lVhrf/Svg==}
@@ -1171,6 +1177,11 @@ snapshots:
   brace-expansion@2.0.1:
     dependencies:
       balanced-match: 1.0.2
+
+  codemirror-markdown-commands@0.1.0:
+    dependencies:
+      '@codemirror/state': 6.5.2
+      '@codemirror/view': 6.36.4
 
   codemirror@6.0.1:
     dependencies:

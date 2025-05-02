@@ -13,6 +13,8 @@ import {
   indentWithTab,
 } from "@codemirror/commands";
 import { markdown } from "@codemirror/lang-markdown";
+import { tooltipPlugin } from "./plugins/tooltip";
+// import { slashCommand } from "./plugins/slash";
 
 export interface EditorConfig {
   root: Element | DocumentFragment | null;
@@ -36,7 +38,7 @@ export class MarkdownEditor {
   keymaps: KeyBinding[];
   placeholder: string;
   onChange?: (value: string) => void;
-  status: "init" | "create" | "destroy";
+  status: "init" | "created" | "destroy";
   constructor(config: EditorConfig) {
     this.root = config.root;
     this.defaultValue = config.defaultValue;
@@ -85,11 +87,13 @@ export class MarkdownEditor {
             if (this.onChange) this.onChange(this.value);
           }
         }),
+        tooltipPlugin(),
+        // slashCommand(),
       ],
     });
 
     this.view = editorView;
-    this.status = "create";
+    this.status = "created";
   }
   get value(): string {
     if (this.view) {

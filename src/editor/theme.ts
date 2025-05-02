@@ -19,7 +19,7 @@ const chalky = "#ffa360",
   highlightBackground = "#8a91991a",
   background = "#ffffff",
   tooltipBackground = "#353a42",
-  selection = "#036dd626",
+  selection = "#60a5fa66",
   cursor = "#528bff",
   slate = "#334155",
   link = "#419aff",
@@ -66,7 +66,7 @@ export const lightTheme = EditorView.theme(
 
     ".cm-cursor, .cm-dropCursor": { borderLeftColor: cursor },
     "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
-      { backgroundColor: "#44475a" },
+      { backgroundColor: selection },
 
     ".cm-panels": { backgroundColor: darkBackground, color: slate },
     ".cm-panels.cm-panels-top": { borderBottom: "2px solid black" },

@@ -106,7 +106,7 @@ const editor = new MarkdownEditor({
   root,
   defaultValue: "# Initialize Text",
   onChange: (value) => {
-    console.log(value);
+    // console.log(value);
   },
 });
 
