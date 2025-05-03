@@ -13,9 +13,18 @@ import {
   indentWithTab,
 } from "@codemirror/commands";
 import { markdown } from "@codemirror/lang-markdown";
-import { tooltipPlugin } from "./plugins/tooltip";
-// import { slashCommand } from "./plugins/slash";
+import {
+  tooltipPlugin,
+  type I18n as TooltipPluginI18n,
+} from "./plugins/tooltip";
+import { slashPlugin, type I18n as SlashPluginI18n } from "./plugins/slash";
+import { placeholderPlugin } from "./plugins/placeholder";
 
+interface I18n {
+  tooltip?: TooltipPluginI18n;
+  slash?: SlashPluginI18n;
+  placeholder?: string;
+}
 export interface EditorConfig {
   root: Element | DocumentFragment | null;
   defaultValue?: string | Text;
@@ -24,10 +33,13 @@ export interface EditorConfig {
   extensions?: Extension[];
   keymaps?: KeyBinding[];
   placeholder?: string;
+  i18n?: I18n;
   onChange?: (value: string) => void;
 }
 
-export class MarkdownEditor {
+const defaultPlaceholder = 'Please enter text, or enter "/ " to use commands';
+
+export class MagicdownEditor {
   readonly EditorView = EditorView;
   readonly root: Element | DocumentFragment | null;
   readonly defaultValue?: string | Text;
@@ -36,7 +48,7 @@ export class MarkdownEditor {
   languages: LanguageDescription[];
   themes: Extension[];
   keymaps: KeyBinding[];
-  placeholder: string;
+  i18n?: I18n;
   onChange?: (value: string) => void;
   status: "init" | "created" | "destroy";
   constructor(config: EditorConfig) {
@@ -46,7 +58,7 @@ export class MarkdownEditor {
     this.themes = config.themes ?? [];
     this.extensions = config.extensions ?? [];
     this.keymaps = config.keymaps ?? [];
-    this.placeholder = config.placeholder || "Please enter text...";
+    this.i18n = config.i18n;
     if (config.onChange) this.onChange = config.onChange;
     this.status = "init";
   }
@@ -70,7 +82,7 @@ export class MarkdownEditor {
           codeLanguages: this.languages,
         }),
         history(),
-        placeholder(this.placeholder),
+        placeholder(this.i18n?.placeholder || defaultPlaceholder),
         ...this.themes,
         ...this.extensions,
         EditorView.lineWrapping,
@@ -88,7 +100,8 @@ export class MarkdownEditor {
           }
         }),
         tooltipPlugin(),
-        // slashCommand(),
+        slashPlugin(),
+        placeholderPlugin(defaultPlaceholder),
       ],
     });
 

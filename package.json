@@ -1,7 +1,7 @@
 {
   "name": "@xiangfa/mdeditor",
   "description": "A Markdown editor with built-in syntax highlighting based on CodeMirror.",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -47,8 +47,7 @@
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.36.4",
     "@lezer/highlight": "^1.2.1",
-    "codemirror": "^6.0.1",
-    "codemirror-markdown-commands": "^0.1.0"
+    "codemirror": "^6.0.1"
   },
   "devDependencies": {
     "@types/node": "^22.13.13",

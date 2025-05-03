@@ -1,10 +1,10 @@
-import { MarkdownEditor } from "./editor";
+import { MagicdownEditor } from "./editor";
 
-const defaultDoc = `# Milkdown
+const defaultDoc = `# Magicdown Editor
 
-👋 Welcome to Milkdown. We are so glad to see you here!
+👋 Welcome to Magicdown Editor. We are so glad to see you here!
 
-💭 You may wonder, what is Milkdown? Please write something here.
+💭 You may wonder, what is Magicdown Editor? Please write something here.
 
 > ⚠️ **Not the right side!**
 >
@@ -26,83 +26,71 @@ graph TB
     end
 \`\`\`
 
-You're seeing this editor called **🥞Crepe**, which is an editor built on top of Milkdown.
+You're seeing this editor called **Magicdown Editor**, which is an editor built on top of CodeMirror.
 
-If you want to install this editor, you can run \`npm install @milkdown/crepe\`. Then you can use it like this:
+If you want to install this editor, you can run \`npm install @xiangfa/mdeditor\`. Then you can use it like this:
 
 \`\`\`JavaScript
-import { Crepe } from "@milkdown/crepe";
-import "@milkdown/crepe/theme/common/style.css";
-// We have some themes for you to choose, ex.
-import "@milkdown/crepe/theme/frame.css";
+import { MagicdownEditor } from "@xiangfa/mdeditor";
 
-// Or you can create your own theme
-import "./your-theme.css";
-
-const crepe = new Crepe({
-  root: "#app",
-  defaultValue: "# Hello, Milkdown!",
+const editor = new MagicdownEditor({
+  root,
+  defaultValue: defaultDoc,
 });
 
-crepe.create().then(() => {
-  console.log("Milkdown is ready!");
+editor.create().then(({ view }) => {
+  conole.log(editor.value);
+  setTimeout(() => {
+    editor.update("New documentation content");
+  }, 3000);
 });
-
-// Before unmount
-crepe.destroy();
 \`\`\`
 
 ***
 
 ## Structure
 
-> 🍼 [Milkdown](https://github.com/Milkdown/milkdown) is a WYSIWYG markdown editor framework.
+> 🍼 [Magicdown Editor](https://github.com/u14app/markdown-editor) is a markdown editor framework.
 >
-> Which means you can build your own markdown editor with Milkdown.
+> Which means you can build your own markdown editor with Magicdown Editor.
 
-In the real world, a typical milkdown editor is built on top of 3 layers:
+In the real world, a typical Magicdown editor is built on top of 2 layers:
 
-* [x] 🥛 Core: The core of Milkdown, which provides the plugin loading system with the editor concepts.
+* [x] 🥛 Core: The core of Magicdown Editor, which provides the plugin loading system with the editor.
 * [x] 🧇 Plugins: A set of plugins that can be used to extend the functionalities of the editor.
-* [x] 🍮 Components: Some headless components that can be used to build your own editor.
 
-At the start, you may find it hard to understand all these concepts.
-But don't worry, we have this \`@milkdown/crepe\` editor for you to get started quickly.
+At the start, you may find it hard to understand all these editor.
+But don't worry, we have this \`@xiangfa/mdeditor\` editor for you to get started quickly.
 
 ***
 
-## You can do more with Milkdown
+## You can do more with Magicdown Editor
 
-In Milkdown, you can extend the editor in many ways:
+In Magicdown Editor, you can extend the editor in many ways:
 
-| Feature      | Description                                          | Example                   |
-| ------------ | ---------------------------------------------------- | ------------------------- |
-| 🎨 Theme     | Create your own theme with CSS                       | Nord, Dracula             |
-| 🧩 Plugin    | Create your own plugin to extend the editor          | Search, Collab            |
-| 📦 Component | Create your own component to build your own editor   | Slash Menu, Toolbar       |
-| 📚 Syntax    | Create your own syntax to extend the markdown parser | Image with Caption, LaTex |
+| Feature      | Description                                          |
+| ------------ | ---------------------------------------------------- |
+| 🎨 Theme     | Create your own theme with CSS                       |
+| 🧩 Plugin    | Create your own plugin to extend the editor          |
+| 📚 Syntax    | Create your own syntax to extend the markdown parser |
 
-We have provided a lot of plugins and components, with an out-of-the-box crepe editor for you to use and learn.
+We have provided a lot of plugins, with an out-of-the-box markdown editor for you to use and learn.
 
 ***
 
 ## Open Source
 
-* Milkdown is an open-source project under the MIT license.
+* Magicdown Editor is an open-source project under the MIT license.
 * Everyone is welcome to contribute to the project, and you can use it in your own project for free.
-* Please let me know what you are building with Milkdown, I would be so glad to see that!
+* Please let me know what you are building with Magicdown Editor, I would be so glad to see that!
 
-Maintaining Milkdown is a lot of work, and we are working on it in our spare time.
-If you like Milkdown, please consider supporting us by [sponsoring](https://github.com/sponsors/Saul-Mirone) the project.
-We'll be so grateful for your support.
+## Who built Magicdown Editor?
 
-## Who built Milkdown?
-
-Milkdown is built by [Mirone](https://github.com/Saul-Mirone) and designed by [Meo](https://meo.cool).`;
+Magicdown Editor is built by [u14app](https://github.com/u14app) and designed by [Amery2010](https://github.com/Amery2010).`;
 
 const root = document.createElement("div");
 
-const editor = new MarkdownEditor({
+const editor = new MagicdownEditor({
   root,
   defaultValue: "# Initialize Text",
   onChange: (value) => {

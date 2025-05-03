@@ -15,9 +15,9 @@ npm install @xiangfa/mdeditor
 ### First editor
 
 ```javascript
-import { MarkdownEditor } from "@xiangfa/mdeditor";
+import { MagicdownEditor } from "@xiangfa/mdeditor";
 
-const editor = new MarkdownEditor({
+const editor = new MagicdownEditor({
   root,
   defaultValue: defaultDoc,
 });
@@ -40,6 +40,6 @@ interface EditorConfig {
   themes?: Extension[];
   extensions?: Extension[];
   keymaps?: KeyBinding[];
-  placeholder?: string;
+  i18n?: I18n;
 }
 ```
