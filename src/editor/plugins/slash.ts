@@ -39,7 +39,7 @@ export type I18n = Record<
 
 interface Command {
   name: string;
-  description: string;
+  description?: string;
   type: "command" | "text";
   execute?: (view: EditorView) => void;
 }
@@ -53,7 +53,6 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
   const exampleCommands: Command[] = [
     {
       name: i18n.heading?.name || "Heading",
-      description: i18n.heading?.description || "Insert Heading",
       type: "text",
     },
     {
@@ -130,7 +129,6 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
     },
     {
       name: i18n.list?.name || "List",
-      description: i18n.list?.description || "Insert List",
       type: "text",
     },
     {
@@ -171,7 +169,6 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
     },
     {
       name: i18n.advanced?.name || "Advanced",
-      description: i18n.advanced?.description || "Advanced Commands",
       type: "text",
     },
     {
@@ -272,7 +269,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
     exampleCommands.forEach((cmd) => {
       const item = document.createElement("div");
       item.textContent = cmd.name;
-      item.title = cmd.description;
+      item.title = cmd.description || cmd.name;
       if (cmd.type === "command") {
         item.classList.add("cm-slash-command-item");
         item.addEventListener("click", () => cmd.execute && cmd.execute(view));
@@ -405,46 +402,6 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
     }
   }
 
-  const tooltipViewPlugin = ViewPlugin.fromClass(ToolTip);
-
-  const tooltipBaseTheme = EditorView.baseTheme({
-    // ... (保持 tooltipBaseTheme 样式不变)
-    ".cm-slash-command-list": {
-      display: "none", // 默认隐藏
-      position: "absolute", // 绝对定位
-      maxHeight: "300px",
-      overflow: "auto",
-      color: "#191c20",
-      borderRadius: "8px",
-      background: "#f8f9ff",
-      boxShadow:
-        "0px 1px 3px 1px rgba(0,0,0,.15),0px 1px 2px 0px rgba(0,0,0,.3)",
-      padding: "8px",
-      minWidth: "200px",
-      zIndex: 100, // 确保在编辑器上方
-      userSelect: "none", // 防止文本选择问题
-      cursor: "default", // 默认光标样式
-    },
-    ".cm-slash-command-item": {
-      fontSize: "12px",
-      fontWeight: 500,
-      lineHeight: "20px",
-      padding: "6px 10px",
-      borderRadius: "6px",
-      cursor: "pointer", // 可点击的光标
-      "&:hover": {
-        background: "#e1e2e8",
-      },
-    },
-    ".cm-slash-label-item": {
-      fontSize: "14px",
-      fontWeight: 600,
-      lineHeight: "20px",
-      padding: "10px",
-      color: "#777",
-    },
-  });
-
   // Update Listener 负责检测 "/ " 输入，并触发删除文本、移动光标以及启动 slash command 模式
   const slashCommandStartListener = VEditorView.updateListener.of(
     (update: ViewUpdate) => {
@@ -526,11 +483,68 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
     },
   ]);
 
+  const tooltipViewPlugin = ViewPlugin.fromClass(ToolTip);
+
+  const tooltipBaseTheme = EditorView.theme({
+    ".cm-slash-command-list": {
+      display: "none", // 默认隐藏
+      position: "absolute", // 绝对定位
+      maxHeight: "300px",
+      overflow: "auto",
+      color: "#191c20",
+      borderRadius: "8px",
+      background: "#f8f9ff",
+      boxShadow:
+        "0px 1px 3px 1px rgba(0,0,0,.15),0px 1px 2px 0px rgba(0,0,0,.3)",
+      padding: "8px",
+      minWidth: "200px",
+      zIndex: 100, // 确保在编辑器上方
+      userSelect: "none", // 防止文本选择问题
+      cursor: "default", // 默认光标样式
+    },
+    ".cm-slash-command-item": {
+      fontSize: "12px",
+      fontWeight: 500,
+      lineHeight: "20px",
+      padding: "6px 10px",
+      borderRadius: "6px",
+      cursor: "pointer", // 可点击的光标
+      "&:hover": {
+        background: "#e1e2e8",
+      },
+    },
+    ".cm-slash-label-item": {
+      fontSize: "14px",
+      fontWeight: 600,
+      lineHeight: "20px",
+      padding: "10px",
+      color: "#777",
+    },
+  });
+
+  const tooltipDarkTheme = EditorView.theme(
+    {
+      ".cm-slash-command-list": {
+        color: "#f7fafa",
+        backgroundColor: "#1f1f23",
+      },
+      ".cm-slash-command-item": {
+        "&:hover": {
+          backgroundColor: "#343434",
+        },
+      },
+      ".cm-slash-label-item": {
+        color: "#8a8a8a",
+      },
+    },
+    { dark: true }
+  );
+
   return [
     tooltipViewPlugin, // 管理 tooltip 的 DOM 元素和其可见性/位置
     tooltipBaseTheme, // tooltip 的样式
+    tooltipDarkTheme,
     slashCommandStartListener, // 检测 "/ " 输入，启动模式 (删除文本+effect)
     slashCommandKeymap, // 处理 Escape 键取消模式 (effect)
-    // 其他可能的取消方式（例如输入非命令字符、点击外部等）可以按需添加
   ];
 }

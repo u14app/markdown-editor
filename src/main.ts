@@ -96,6 +96,21 @@ const editor = new MagicdownEditor({
   onChange: (value) => {
     // console.log(value);
   },
+  i18n: {
+    placeholder: "请输入文本...",
+    slash: {
+      heading: {
+        name: "标题",
+      },
+      h1: {
+        name: "一级标题",
+        description: "插入一级标题",
+      },
+    },
+    tooltip: {
+      bold: "粗体",
+    },
+  },
 });
 
 editor.create().then(() => {

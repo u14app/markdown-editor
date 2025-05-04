@@ -80,31 +80,27 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
           },
           write: (measure, view) => {
             if (measure && measure.shouldShow && measure.coords) {
-              // These measurements are definitely slow and we don't want to
-              // do them very often! We may want to cache these in the future.
+              const { coords } = measure;
+
+              const editorRect = view.dom.getBoundingClientRect();
               const tooltipRect = this.dom.getBoundingClientRect();
-              const scrollRect = view.dom.getBoundingClientRect();
-              const domRect = view.dom.parentElement?.getBoundingClientRect();
+              let top = coords.top - tooltipRect.height - 8; // Prioritize above
+              let left = coords.left;
 
-              // The furthest right we want to place the tooltip, to avoid
-              // it getting smushed
-              const rightEdge = scrollRect.width - tooltipRect.width;
+              // Check if there's enough space above
+              if (top < editorRect.top) {
+                top = coords.top + 8; // Fallback to below if not enough space above
+              }
 
-              // If the tooltip is slammed to the right side of the page,
-              // pull it back so that it isn't quite as slammed.
-              const left = Math.min(measure.coords.left, rightEdge);
+              // Boundary checks (simplified)
+              top = Math.max(top, editorRect.top);
+              top = Math.min(top, editorRect.bottom - tooltipRect.height);
+              left = Math.max(left, editorRect.left);
+              left = Math.min(left, editorRect.right - tooltipRect.width);
 
-              // If the tooltip is in the overscrolled area at the top,
-              // try to show it just at the top. This relies on the parent
-              // of the codemirror container, which is not an ideal
-              // strategy.
-              let top = measure.coords.top - tooltipRect.height;
-              top = domRect ? Math.max(domRect.y, top) : top;
-
+              this.dom.style.left = `${left - editorRect.left}px`;
+              this.dom.style.top = `${top - editorRect.top}px`;
               this.dom.style.display = "flex";
-              // Position and show the element
-              this.dom.style.left = `${left}px`;
-              this.dom.style.top = `${top - 16}px`;
               this.dom.ariaHidden = "false";
             } else {
               this.dom.style.display = "none";
@@ -121,7 +117,7 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
 
   const tooltipViewPlugin = ViewPlugin.fromClass(ToolTip);
 
-  const tooltipBaseTheme = EditorView.baseTheme({
+  const tooltipBaseTheme = EditorView.theme({
     ".cm-tooltips": {
       display: "none",
       position: "absolute",
@@ -153,5 +149,18 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
     },
   });
 
-  return [tooltipViewPlugin, tooltipBaseTheme];
+  const tooltipDarkTheme = EditorView.theme(
+    {
+      ".cm-tooltips": {
+        color: "#f7fafa",
+        backgroundColor: "#1f1f23",
+        "& > span:hover": {
+          backgroundColor: "#343434",
+        },
+      },
+    },
+    { dark: true }
+  );
+
+  return [tooltipViewPlugin, tooltipBaseTheme, tooltipDarkTheme];
 }

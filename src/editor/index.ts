@@ -21,8 +21,8 @@ import { slashPlugin, type I18n as SlashPluginI18n } from "./plugins/slash";
 import { placeholderPlugin } from "./plugins/placeholder";
 
 interface I18n {
-  tooltip?: TooltipPluginI18n;
-  slash?: SlashPluginI18n;
+  tooltip?: Partial<TooltipPluginI18n>;
+  slash?: Partial<SlashPluginI18n>;
   placeholder?: string;
 }
 export interface EditorConfig {
@@ -99,9 +99,9 @@ export class MagicdownEditor {
             if (this.onChange) this.onChange(this.value);
           }
         }),
-        tooltipPlugin(),
-        slashPlugin(),
-        placeholderPlugin(defaultPlaceholder),
+        tooltipPlugin(this.i18n?.tooltip),
+        slashPlugin(this.i18n?.slash),
+        placeholderPlugin(this.i18n?.placeholder || defaultPlaceholder),
       ],
     });
 
