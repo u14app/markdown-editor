@@ -1,11 +1,14 @@
-import { type Text, type Extension } from "@codemirror/state";
+import { type Text, type Extension, Compartment } from "@codemirror/state";
 import {
   EditorView,
   keymap,
   placeholder,
   type KeyBinding,
 } from "@codemirror/view";
-import { type LanguageDescription } from "@codemirror/language";
+import {
+  syntaxHighlighting,
+  type LanguageDescription,
+} from "@codemirror/language";
 import {
   defaultKeymap,
   history,
@@ -13,6 +16,7 @@ import {
   indentWithTab,
 } from "@codemirror/commands";
 import { markdown } from "@codemirror/lang-markdown";
+import { themeHighlightStyle } from "./theme";
 import {
   tooltipPlugin,
   type I18n as TooltipPluginI18n,
@@ -33,6 +37,7 @@ export interface EditorConfig {
   extensions?: Extension[];
   keymaps?: KeyBinding[];
   placeholder?: string;
+  theme?: "system" | "light" | "dark";
   i18n?: I18n;
   onChange?: (value: string) => void;
 }
@@ -51,6 +56,8 @@ export class MagicdownEditor {
   i18n?: I18n;
   onChange?: (value: string) => void;
   status: "init" | "created" | "destroy";
+  theme: "system" | "light" | "dark";
+  private themeCompartment = new Compartment();
   constructor(config: EditorConfig) {
     this.root = config.root;
     this.defaultValue = config.defaultValue;
@@ -58,18 +65,26 @@ export class MagicdownEditor {
     this.themes = config.themes ?? [];
     this.extensions = config.extensions ?? [];
     this.keymaps = config.keymaps ?? [];
+    this.theme = config.theme ?? "system";
     this.i18n = config.i18n;
     if (config.onChange) this.onChange = config.onChange;
     this.status = "init";
+  }
+  private isDark(): boolean {
+    if (this.theme === "dark") return true;
+    if (this.theme === "light") return false;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  private async getThemeExtension() {
+    const { lightTheme, darkTheme } = await import("./theme");
+    return this.isDark()
+      ? [darkTheme, syntaxHighlighting(themeHighlightStyle)]
+      : [lightTheme, syntaxHighlighting(themeHighlightStyle)];
   }
   async create() {
     if (this.languages.length === 0) {
       const { languages: langList } = await import("@codemirror/language-data");
       this.languages = langList;
-    }
-    if (this.themes.length === 0) {
-      const { theme } = await import("./theme");
-      this.themes = [theme];
     }
 
     if (this.status !== "init") return;
@@ -83,13 +98,12 @@ export class MagicdownEditor {
         }),
         history(),
         placeholder(this.i18n?.placeholder || defaultPlaceholder),
+        this.themeCompartment.of(await this.getThemeExtension()),
         ...this.themes,
         ...this.extensions,
         EditorView.lineWrapping,
         keymap.of([
-          // A large set of basic bindings
           ...defaultKeymap,
-          // Redo/undo keys
           ...historyKeymap,
           indentWithTab,
           ...this.keymaps,
@@ -125,6 +139,16 @@ export class MagicdownEditor {
       throw new Error("Please use `create()` to create an instance.");
     }
   }
+  async setTheme(theme: "system" | "light" | "dark") {
+    this.theme = theme;
+    if (this.view) {
+      this.view.dispatch({
+        effects: this.themeCompartment.reconfigure(
+          await this.getThemeExtension(),
+        ),
+      });
+    }
+  }
   use(plugin: Extension | Extension[]) {
     if (Array.isArray(plugin)) {
       this.extensions = [...this.extensions, ...plugin];
@@ -138,3 +162,5 @@ export class MagicdownEditor {
     this.view?.destroy();
   }
 }
+
+export { aiPlugin, type AIPluginConfig, type AIPluginI18n } from "./plugins/ai";

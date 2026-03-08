@@ -45,7 +45,7 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
     addCommand(
       i18n.strikethrough || "Strikethrough",
       icons.strikethrough,
-      strikethrough
+      strikethrough,
     );
     addCommand(i18n.code || "Code", icons.code, code);
     addCommand(i18n.math || "Math", icons.math, math);
@@ -60,13 +60,19 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
     constructor(view: EditorView) {
       const toolTipDOM = createTooltipDOM(view);
       this.dom = view.dom.appendChild(toolTipDOM);
+
+      // Prevent right-click from triggering tooltip
+      view.dom.addEventListener("contextmenu", () => {
+        this.dom.style.display = "none";
+        this.dom.ariaHidden = "true";
+      });
     }
     update(update: ViewUpdate): void {
       if (update.selectionSet) {
         update.view.requestMeasure({
           read: (view) => {
             const range = view.state.selection.ranges.find(
-              (range) => !range.empty
+              (range) => !range.empty,
             );
             if (range) {
               // Coords here are relative to the scrollable document.
@@ -87,9 +93,9 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
               let top = coords.top - tooltipRect.height - 8; // Prioritize above
               let left = coords.left;
 
-              // Check if there's enough space above
-              if (top < editorRect.top) {
-                top = coords.top + 8; // Fallback to below if not enough space above
+              // Check if there's enough space above (editor and viewport)
+              if (top < Math.max(editorRect.top, 0)) {
+                top = coords.bottom + 8; // Fallback to below if not enough space above
               }
 
               // Boundary checks (simplified)
@@ -126,6 +132,7 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
       borderRadius: "8px",
       overflow: "hidden",
       textAlign: "center",
+      color: "#000",
       backgroundColor: "#f8f9ff",
       boxShadow:
         "0px 1px 3px 1px rgba(0,0,0,.15),0px 1px 2px 0px rgba(0,0,0,.3)",
@@ -159,7 +166,7 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
         },
       },
     },
-    { dark: true }
+    { dark: true },
   );
 
   return [tooltipViewPlugin, tooltipBaseTheme, tooltipDarkTheme];

@@ -1,4 +1,5 @@
-import { MagicdownEditor } from "./editor";
+import { MagicdownEditor, aiPlugin } from "./editor";
+import { loadSettings, createSettingsUI, type Settings } from "./settings";
 
 const defaultDoc = `# Magicdown Editor
 
@@ -89,34 +90,85 @@ We have provided a lot of plugins, with an out-of-the-box markdown editor for yo
 Magicdown Editor is built by [u14app](https://github.com/u14app) and designed by [Amery2010](https://github.com/Amery2010).`;
 
 const root = document.createElement("div");
+const app = document.querySelector<HTMLDivElement>("#app")!;
+app.appendChild(root);
 
-const editor = new MagicdownEditor({
-  root,
-  defaultValue: "# Initialize Text",
-  onChange: (value) => {
-    // console.log(value);
+const settings = loadSettings();
+
+let editor: MagicdownEditor | null = null;
+
+function createEditor(doc?: string) {
+  editor = new MagicdownEditor({
+    root,
+    defaultValue: doc || "# Initialize Text",
+    theme: settings.theme,
+    extensions: [
+      ...(settings.ai.apiBaseUrl && settings.ai.apiKey
+        ? [
+            aiPlugin({
+              apiBaseUrl: settings.ai.apiBaseUrl,
+              apiKey: settings.ai.apiKey,
+              model: settings.ai.model || undefined,
+              enableTooltip: true,
+              enableSlash: true,
+              i18n: {
+                improveWriting: "提升写作",
+                emojify: "添加 Emoji",
+                makeLonger: "扩展内容",
+                makeShorter: "精简内容",
+                fixSpellingGrammar: "修正语法",
+                simplifyLanguage: "简化语言",
+                continueWriting: "继续写作",
+                summary: "总结",
+                comment: "添加注释",
+                explain: "解释说明",
+                askAI: "询问 AI",
+                askAIPlaceholder: "向 AI 提问...",
+              },
+            }),
+          ]
+        : []),
+    ],
+    onChange: () => {},
+    i18n: {
+      placeholder: "请输入文本...",
+      slash: {
+        heading: { name: "标题" },
+        h1: { name: "一级标题", description: "插入一级标题" },
+      },
+      tooltip: { bold: "粗体" },
+    },
+  });
+
+  editor.create().then(() => {
+    if (!doc) {
+      setTimeout(() => editor?.update(defaultDoc), 2000);
+    }
+  });
+}
+
+createEditor();
+
+// Listen for system theme changes
+const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+mediaQuery.addEventListener("change", () => {
+  if (settings.theme === "system") {
+    editor?.setTheme("system");
+  }
+});
+
+// Settings UI
+const settingsUI = createSettingsUI({
+  settings,
+  onThemeChange: (theme) => {
+    editor?.setTheme(theme);
   },
-  i18n: {
-    placeholder: "请输入文本...",
-    slash: {
-      heading: {
-        name: "标题",
-      },
-      h1: {
-        name: "一级标题",
-        description: "插入一级标题",
-      },
-    },
-    tooltip: {
-      bold: "粗体",
-    },
+  onAISettingsChange: () => {
+    const currentDoc = editor?.status === "created" ? editor.value : undefined;
+    editor?.destroy();
+    root.innerHTML = "";
+    createEditor(currentDoc);
   },
 });
 
-editor.create().then(() => {
-  setTimeout(() => {
-    editor.update(defaultDoc);
-  }, 2000);
-});
-
-document.querySelector<HTMLDivElement>("#app")?.appendChild(root);
+app.appendChild(settingsUI);

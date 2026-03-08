@@ -1,6 +1,5 @@
 import { EditorView } from "@codemirror/view";
-import { Extension } from "@codemirror/state";
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { HighlightStyle } from "@codemirror/language";
 import { tags as t } from "@lezer/highlight";
 
 // Using https://github.com/one-dark/vscode-one-dark-theme/ as reference for the colors
@@ -52,6 +51,7 @@ export const color = {
 export const lightTheme = EditorView.theme(
   {
     "&": {
+      padding: "6px",
       color: slate,
       backgroundColor: background,
     },
@@ -121,13 +121,39 @@ export const lightTheme = EditorView.theme(
         color: slate,
       },
     },
+    ".cm-ai-dialog": {
+      width: "100%",
+      color: slate,
+      padding: 0,
+    },
+    ".cm-ai-dialog-input": {
+      backgroundColor: "transparent",
+      color: slate,
+      border: "none",
+      borderColor: "transparent",
+      borderRadius: 0,
+    },
+    ".cm-ai-dialog-input:focus": {
+      borderColor: "#ddd",
+    },
+    ".cm-ai-dialog-commands": {
+      padding: "4px",
+    },
+    ".cm-ai-dialog-btn": {
+      padding: "6px",
+    },
+    ".cm-ai-dialog-btn-icon > svg": {
+      width: "14px",
+      height: "14px",
+    },
   },
-  { dark: false }
+  { dark: false },
 );
 
 export const darkTheme = EditorView.theme(
   {
     "&": {
+      padding: "6px",
       color: gray,
       backgroundColor: darkBackground,
     },
@@ -197,20 +223,49 @@ export const darkTheme = EditorView.theme(
         color: gray,
       },
     },
+    ".cm-ai-dialog": {
+      width: "100%",
+      color: slate,
+      padding: 0,
+    },
+    ".cm-ai-dialog-input": {
+      backgroundColor: "transparent",
+      color: slate,
+      border: "none",
+      borderColor: "transparent",
+      borderRadius: 0,
+    },
+    ".cm-ai-dialog-input:focus": {
+      borderColor: "#ddd",
+    },
+    ".cm-ai-dialog-commands": {
+      padding: "4px",
+    },
+    ".cm-ai-dialog-btn": {
+      padding: "6px",
+    },
+    ".cm-ai-dialog-btn-icon > svg": {
+      width: "14px",
+      height: "14px",
+    },
   },
-  { dark: true }
+  { dark: true },
 );
 
 /// The highlighting style for code in the One Dark theme.
 export const themeHighlightStyle = HighlightStyle.define([
   { tag: t.keyword, color: violet },
   {
-    tag: [t.name, t.deleted, t.character, t.propertyName, t.macroName],
+    tag: [t.name, t.deleted, t.character, t.macroName],
     color: coral,
+  },
+  {
+    tag: [t.propertyName],
+    color: cursor,
   },
   { tag: [t.function(t.variableName), t.labelName], color: malibu },
   { tag: [t.color, t.constant(t.name), t.standard(t.name)], color: whiskey },
-  { tag: [t.definition(t.name), t.separator], color: slate },
+  { tag: [t.definition(t.name), t.separator], color: coral },
   {
     tag: [
       t.typeName,
@@ -246,11 +301,3 @@ export const themeHighlightStyle = HighlightStyle.define([
   { tag: [t.string, t.inserted], color: sage },
   { tag: t.invalid, color: invalid },
 ]);
-
-/// Extension to enable the One Dark theme (both the editor theme and
-/// the highlight style).
-export const theme: Extension = [
-  lightTheme,
-  darkTheme,
-  syntaxHighlighting(themeHighlightStyle),
-];

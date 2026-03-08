@@ -1,4 +1,4 @@
-import { StateEffect, Extension, EditorSelection } from "@codemirror/state";
+import { StateEffect, Extension } from "@codemirror/state";
 import {
   EditorView,
   ViewPlugin,
@@ -44,12 +44,11 @@ interface Command {
   execute?: (view: EditorView) => void;
 }
 
-export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
-  // 定义启动和停止 slash command 模式的 StateEffect
-  const startSlashCommandEffect = StateEffect.define<{ pos: number }>();
-  const stopSlashCommandEffect = StateEffect.define();
+export const stopSlashCommandEffect = StateEffect.define();
 
-  // 示例命令数组，修改 execute 方法，在执行后 dispatch stopSlashCommandEffect
+export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
+  const startSlashCommandEffect = StateEffect.define<{ pos: number }>();
+
   const exampleCommands: Command[] = [
     {
       name: i18n.heading?.name || "Heading",
@@ -61,10 +60,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.h1(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -73,10 +69,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.h2(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -85,10 +78,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.h3(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -97,10 +87,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.h4(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -109,10 +96,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.h5(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -121,10 +105,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.h6(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -137,10 +118,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.ul(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -149,10 +127,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.ol(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -161,10 +136,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.todo(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -177,10 +149,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.link(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -189,10 +158,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.image(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -201,10 +167,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.code(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -213,10 +176,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.math(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -225,10 +185,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.table(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -237,10 +194,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.quote(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
     {
@@ -249,22 +203,26 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       type: "command",
       execute: (view: EditorView) => {
         command.horizontal(view);
-        view.dispatch({
-          // 执行命令后，停止 slash command 模式
-          effects: [stopSlashCommandEffect.of(null)],
-        });
+        view.dispatch({ effects: [stopSlashCommandEffect.of(null)] });
       },
     },
   ];
 
-  function createTooltipDOM(view: EditorView): HTMLElement {
+  // Shared reference for keymap access
+  let activePlugin: ToolTip | null = null;
+
+  function createTooltipDOM(view: EditorView): {
+    dom: HTMLElement;
+    commandItems: { el: HTMLElement; cmd: Command }[];
+  } {
     const dom = document.createElement("div");
     dom.classList.add("cm-slash-command-list");
 
-    // 添加 mousedown 阻止默认事件，防止点击 tooltip 时编辑器失焦
     dom.addEventListener("mousedown", (e) => {
       e.preventDefault();
     });
+
+    const commandItems: { el: HTMLElement; cmd: Command }[] = [];
 
     exampleCommands.forEach((cmd) => {
       const item = document.createElement("div");
@@ -273,6 +231,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       if (cmd.type === "command") {
         item.classList.add("cm-slash-command-item");
         item.addEventListener("click", () => cmd.execute && cmd.execute(view));
+        commandItems.push({ el: item, cmd });
       } else {
         item.classList.add("cm-slash-label-item");
       }
@@ -280,113 +239,138 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       dom.appendChild(item);
     });
 
-    return dom;
+    return { dom, commandItems };
   }
 
   class ToolTip implements PluginValue {
     dom: HTMLElement;
-    active = false; // Tooltip 的激活状态
-    triggerPos: number = 0; // 记录触发时的光标位置（行首）
-    view: EditorView; // 保存 view 实例，方便在事件处理中使用
+    commandItems: { el: HTMLElement; cmd: Command }[];
+    active = false;
+    activeIndex = -1;
+    triggerPos: number = 0;
+    view: EditorView;
 
     constructor(view: EditorView) {
-      this.view = view; // 保存 view 实例
-      const toolTipDOM = createTooltipDOM(view);
-      this.dom = view.dom.appendChild(toolTipDOM);
-      this.dom.style.display = "none"; // 初始状态隐藏
+      this.view = view;
+      const { dom, commandItems } = createTooltipDOM(view);
+      this.commandItems = commandItems;
+      this.dom = view.dom.appendChild(dom);
+      this.dom.style.display = "none";
       this.dom.ariaHidden = "true";
 
-      // (可选) 添加点击编辑器外部隐藏 tooltip 的监听，如果需要的话
       this.onDocClick = this.onDocClick.bind(this);
       document.addEventListener("click", this.onDocClick);
+
+      activePlugin = this;
     }
 
     onDocClick(event: MouseEvent): void {
-      // 如果 tooltip 激活并且点击事件的目标不在 tooltip DOM 内
       if (this.active && !this.dom.contains(event.target as Node)) {
-        // Dispatch stop effect
         this.view.dispatch({ effects: stopSlashCommandEffect.of(null) });
       }
     }
 
+    highlightItem(index: number) {
+      this.commandItems.forEach(({ el }) =>
+        el.classList.remove("cm-slash-command-item-active"),
+      );
+      if (index >= 0 && index < this.commandItems.length) {
+        this.activeIndex = index;
+        const item = this.commandItems[index]!;
+        item.el.classList.add("cm-slash-command-item-active");
+        item.el.scrollIntoView({ block: "nearest" });
+      }
+    }
+
+    moveSelection(delta: number) {
+      if (!this.active || this.commandItems.length === 0) return;
+      let next = this.activeIndex + delta;
+      if (next < 0) next = this.commandItems.length - 1;
+      if (next >= this.commandItems.length) next = 0;
+      this.highlightItem(next);
+    }
+
+    executeSelected() {
+      if (
+        !this.active ||
+        this.activeIndex < 0 ||
+        this.activeIndex >= this.commandItems.length
+      )
+        return;
+      const item = this.commandItems[this.activeIndex]!;
+      if (item.cmd.execute) item.cmd.execute(this.view);
+    }
+
     update(update: ViewUpdate): void {
-      // 检查本次更新中是否包含启动或停止 slash command 的 StateEffect
       for (const tr of update.transactions) {
         for (const effect of tr.effects) {
           if (effect.is(startSlashCommandEffect)) {
-            this.active = true; // 启动模式
-            this.triggerPos = effect.value.pos; // 记录触发时的光标位置
-            // console.log("ToolTip: Received start effect, active:", this.active, "pos:", this.triggerPos);
+            this.active = true;
+            this.triggerPos = effect.value.pos;
+            this.activeIndex = -1;
           } else if (effect.is(stopSlashCommandEffect)) {
-            this.active = false; // 停止模式
-            // console.log("ToolTip: Received stop effect, active:", this.active);
+            this.active = false;
+            this.activeIndex = -1;
           }
         }
       }
 
-      // 如果当前 tooltip 是非激活状态，确保 DOM 是隐藏的，然后直接返回，不需要测量和定位
       if (!this.active) {
         if (this.dom.style.display !== "none") {
           this.dom.style.display = "none";
           this.dom.ariaHidden = "true";
-          // console.log("ToolTip: Hiding DOM because not active");
         }
-        return; // 不活跃时不进行后续测量和定位
+        return;
       }
 
-      // 如果 tooltip 处于激活状态，请求测量以定位 DOM
       update.view.requestMeasure({
         read: (view) => {
-          // 在激活状态下，使用记录的触发位置来获取坐标
           const pos = this.triggerPos;
 
-          // 检查记录的位置是否仍然有效（防止文档被大幅度修改导致位置失效）
           if (pos < 0 || pos > view.state.doc.length) {
-            this.active = false; // 位置无效，停止模式
-            // console.log("ToolTip: Deactivating due to invalid position");
-            return { shouldShow: false }; // 不显示 DOM
+            this.active = false;
+            return { shouldShow: false };
           }
 
-          // 获取触发位置的坐标
           const coords = view.coordsAtPos(pos);
           if (!coords) {
-            // 如果坐标不可用（例如，触发位置不在当前可见区域），隐藏 DOM 但保持 active 状态
-            // console.log("ToolTip: Coords not available, hiding DOM temporarily");
-            return { shouldShow: false }; // 不显示 DOM
+            return { shouldShow: false };
           }
 
-          // 返回坐标信息和显示标志 (如果 active 就是 true)
-          // console.log("ToolTip: Coords available, requesting show:", this.active);
-          return { coords, shouldShow: this.active }; // 在 active 状态下始终请求显示
+          return { coords, shouldShow: this.active };
         },
         write: (measure, view) => {
-          // write 阶段只负责根据 read 阶段的结果来操作 DOM (显示/隐藏和定位)
           if (measure && measure.shouldShow && measure.coords) {
             const { coords } = measure;
 
-            const editorRect = view.dom.getBoundingClientRect();
+            // Temporarily show to get real dimensions
+            this.dom.style.display = "block";
+            this.dom.style.visibility = "hidden";
             const tooltipRect = this.dom.getBoundingClientRect();
+            this.dom.style.visibility = "";
 
-            // 定位逻辑，相对于编辑器容器的左上角
-            let top = coords.bottom + 2; // 位于触发位置下方
+            const editorRect = view.dom.getBoundingClientRect();
+
+            let top = coords.bottom + 2;
             let left = coords.left;
 
-            // 边界检查，确保 tooltip 在编辑器可见区域内
-            const editorBottom = editorRect.top + view.dom.clientHeight; // 可见区域底部
-            if (top + tooltipRect.height > editorBottom) {
-              top = coords.top - tooltipRect.height - 2; // 如果下方空间不足，则位于上方
+            const editorBottom = editorRect.top + view.dom.clientHeight;
+            const viewportBottom = window.innerHeight;
+            if (
+              top + tooltipRect.height >
+              Math.min(editorBottom, viewportBottom)
+            ) {
+              top = coords.top - tooltipRect.height - 2;
             }
-            top = Math.max(top, editorRect.top); // 不超过编辑器顶部
+            top = Math.max(top, editorRect.top);
 
-            const editorRight = editorRect.left + view.dom.clientWidth; // 可见区域右侧
-            left = Math.min(left, editorRight - tooltipRect.width); // 不超过编辑器右侧
-            left = Math.max(left, editorRect.left); // 不小于编辑器左侧
+            const editorRight = editorRect.left + view.dom.clientWidth;
+            left = Math.min(left, editorRight - tooltipRect.width);
+            left = Math.max(left, editorRect.left);
 
-            // 设置 DOM 的位置，转换为相对于编辑器容器的坐标
             this.dom.style.left = `${left - editorRect.left}px`;
             this.dom.style.top = `${top - editorRect.top}px`;
 
-            this.dom.style.display = "block";
             this.dom.ariaHidden = "false";
           } else {
             this.dom.style.display = "none";
@@ -399,13 +383,12 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
     destroy() {
       document.removeEventListener("click", this.onDocClick);
       this.dom.remove();
+      if (activePlugin === this) activePlugin = null;
     }
   }
 
-  // Update Listener 负责检测 "/ " 输入，并触发删除文本、移动光标以及启动 slash command 模式
   const slashCommandStartListener = VEditorView.updateListener.of(
     (update: ViewUpdate) => {
-      // 只有文档发生改变时才触发检查
       if (!update.docChanged) {
         return;
       }
@@ -415,70 +398,53 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       const line = state.doc.lineAt(head);
       const lineText = state.doc.sliceString(line.from, line.to);
 
-      // 启动 slash command 模式的条件：
-      // 1. 当前行的文本是 exactly "/ "
-      // 2. 光标位于行的末尾 (head === line.to)。这确保是在输入空格后立即触发。
-      // 3. 检查 tooltip 插件是否已经处于激活状态，避免重复启动 (可选，但可以更精确控制)
-      // 通过查找 tooltip 插件实例来检查其 active 状态，但这有点复杂。
-      // 简单起见，我们先不检查当前 active 状态，依赖 dispatch 的幂等性（多次 dispatch 同一个 effect 会合并）。
-      // 一个更 robust 的方法可能是使用 StateField 来存储 active 状态。
-
-      if (lineText === "/ " && head === line.to) {
-        // Dispatch 一个包含两个部分的事务：
-        // 1. 清除当前行文本并移动光标。
-        // 2. 发送 startSlashCommandEffect 来通知 tooltip 插件启动模式。
-        view.dispatch(
-          state.changeByRange((range) => {
-            // 在 range 函数内部再次检查状态，确保在执行前条件仍然满足
-            const currentLine = view.state.doc.lineAt(
-              view.state.selection.main.head
-            );
-            const currentLineText = view.state.doc.sliceString(
-              currentLine.from,
-              currentLine.to
-            );
-
-            if (
-              currentLineText === "/ " &&
-              view.state.selection.main.head === currentLine.to
-            ) {
-              // 执行删除和移动光标
-              return {
-                changes: [
-                  {
-                    from: currentLine.from,
-                    to: currentLine.to,
-                    insert: "",
-                  },
-                ],
-                range: EditorSelection.range(
-                  currentLine.from,
-                  currentLine.from
-                ),
-                // 同时附带 startSlashCommandEffect，将行首位置传递给 tooltip
-                effects: [
-                  startSlashCommandEffect.of({ pos: currentLine.from }),
-                ],
-              };
-            }
-            // 如果条件不再满足，返回原始 range
-            return { range };
-          })
-        );
+      if (lineText === "/" && head === line.to) {
+        view.dispatch({
+          effects: [startSlashCommandEffect.of({ pos: line.from })],
+        });
       }
-    }
+
+      if (lineText.startsWith("/") && lineText.length > 1 && head === line.to) {
+        view.dispatch({
+          effects: [stopSlashCommandEffect.of(null)],
+        });
+      }
+    },
   );
 
-  // (可选) 添加一个 keymap 来处理按 Escape 键取消
   const slashCommandKeymap = keymap.of([
     {
       key: "Escape",
-      run: (view: EditorView) => {
-        // 在按 Escape 时 dispatch stopSlashCommandEffect
-        // ToolTip 插件会响应这个 effect 来隐藏。
-        // 这里不检查当前是否 active，直接 dispatch 即可，非 active 状态下 effect 没有副作用。
-        view.dispatch({ effects: stopSlashCommandEffect.of(null) });
-        return true; // 标记事件已处理
+      run: () => {
+        if (!activePlugin?.active) return false;
+        activePlugin.view.dispatch({
+          effects: stopSlashCommandEffect.of(null),
+        });
+        return true;
+      },
+    },
+    {
+      key: "ArrowDown",
+      run: () => {
+        if (!activePlugin?.active) return false;
+        activePlugin.moveSelection(1);
+        return true;
+      },
+    },
+    {
+      key: "ArrowUp",
+      run: () => {
+        if (!activePlugin?.active) return false;
+        activePlugin.moveSelection(-1);
+        return true;
+      },
+    },
+    {
+      key: "Enter",
+      run: () => {
+        if (!activePlugin?.active) return false;
+        activePlugin.executeSelected();
+        return true;
       },
     },
   ]);
@@ -487,8 +453,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
 
   const tooltipBaseTheme = EditorView.theme({
     ".cm-slash-command-list": {
-      display: "none", // 默认隐藏
-      position: "absolute", // 绝对定位
+      display: "none",
+      position: "absolute",
       maxHeight: "300px",
       overflow: "auto",
       color: "#191c20",
@@ -498,9 +464,7 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
         "0px 1px 3px 1px rgba(0,0,0,.15),0px 1px 2px 0px rgba(0,0,0,.3)",
       padding: "8px",
       minWidth: "200px",
-      zIndex: 100, // 确保在编辑器上方
-      userSelect: "none", // 防止文本选择问题
-      cursor: "default", // 默认光标样式
+      zIndex: 100,
     },
     ".cm-slash-command-item": {
       fontSize: "12px",
@@ -508,10 +472,13 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       lineHeight: "20px",
       padding: "6px 10px",
       borderRadius: "6px",
-      cursor: "pointer", // 可点击的光标
+      cursor: "pointer",
       "&:hover": {
         background: "#e1e2e8",
       },
+    },
+    ".cm-slash-command-item-active": {
+      background: "#e1e2e8",
     },
     ".cm-slash-label-item": {
       fontSize: "14px",
@@ -519,6 +486,9 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       lineHeight: "20px",
       padding: "10px",
       color: "#777",
+    },
+    "&:has(.cm-slash-command-list[aria-hidden='false']) .cm-activeLine": {
+      backgroundColor: "transparent",
     },
   });
 
@@ -533,18 +503,21 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
           backgroundColor: "#343434",
         },
       },
+      ".cm-slash-command-item-active": {
+        backgroundColor: "#343434",
+      },
       ".cm-slash-label-item": {
         color: "#8a8a8a",
       },
     },
-    { dark: true }
+    { dark: true },
   );
 
   return [
-    tooltipViewPlugin, // 管理 tooltip 的 DOM 元素和其可见性/位置
-    tooltipBaseTheme, // tooltip 的样式
+    tooltipViewPlugin,
+    tooltipBaseTheme,
     tooltipDarkTheme,
-    slashCommandStartListener, // 检测 "/ " 输入，启动模式 (删除文本+effect)
-    slashCommandKeymap, // 处理 Escape 键取消模式 (effect)
+    slashCommandStartListener,
+    slashCommandKeymap,
   ];
 }
