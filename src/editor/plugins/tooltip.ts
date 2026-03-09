@@ -1,4 +1,4 @@
-import { type Extension } from "@codemirror/state";
+import { EditorSelection, type Extension } from "@codemirror/state";
 import {
   EditorView,
   ViewPlugin,
@@ -22,8 +22,56 @@ export type I18n = Record<
   string
 >;
 
+type FormatType =
+  | "bold"
+  | "italic"
+  | "strikethrough"
+  | "code"
+  | "math"
+  | "link";
+
+interface FormatUtil {
+  test: (text: string) => boolean;
+  remove: (text: string) => string;
+}
+
+const formatUtils: Record<FormatType, FormatUtil> = {
+  bold: {
+    test: (text) => /\*\*.+?\*\*/s.test(text),
+    remove: (text) => text.replace(/\*\*(.+?)\*\*/gs, "$1"),
+  },
+  italic: {
+    test: (text) => /(?<!\*)\*(?!\*)([^*]+)\*(?!\*)/.test(text),
+    remove: (text) => text.replace(/(?<!\*)\*(?!\*)([^*]+)\*(?!\*)/g, "$1"),
+  },
+  strikethrough: {
+    test: (text) => /~~.+?~~/s.test(text),
+    remove: (text) => text.replace(/~~(.+?)~~/gs, "$1"),
+  },
+  code: {
+    test: (text) => /`[^`]+`/.test(text),
+    remove: (text) => text.replace(/`([^`]+)`/g, "$1"),
+  },
+  math: {
+    test: (text) => /(?<!\$)\$(?!\$)([^$]+)\$(?!\$)/.test(text),
+    remove: (text) => text.replace(/(?<!\$)\$(?!\$)([^$]+)\$(?!\$)/g, "$1"),
+  },
+  link: {
+    test: (text) => /\[([^\]]+)\]\([^)]*\)/.test(text),
+    remove: (text) => text.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1"),
+  },
+};
+
+interface ButtonInfo {
+  element: HTMLSpanElement;
+  format: FormatType | null;
+}
+
 export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
-  function createTooltipDOM(view: EditorView): HTMLElement {
+  function createTooltipDOM(view: EditorView): {
+    dom: HTMLElement;
+    buttons: ButtonInfo[];
+  } {
     const dom = document.createElement("div");
     // Add CSS class name for style control
     dom.className = "cm-tooltips";
@@ -32,34 +80,64 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
     dom.addEventListener("mousedown", (e) => e.preventDefault());
     dom.addEventListener("click", (e) => e.preventDefault());
 
-    const addCommand = (text: string, icon: string, command: Command) => {
+    const buttons: ButtonInfo[] = [];
+
+    const addCommand = (
+      text: string,
+      icon: string,
+      command: Command,
+      format?: FormatType,
+    ) => {
       const button = document.createElement("span");
       button.innerHTML = icon;
       button.title = text;
-      button.addEventListener("click", () => command(view));
+      button.addEventListener("click", () => {
+        if (format && button.classList.contains("cm-tooltip-btn-active")) {
+          const range = view.state.selection.main;
+          if (!range.empty) {
+            const selectedText = view.state.sliceDoc(range.from, range.to);
+            const newText = formatUtils[format].remove(selectedText);
+            view.dispatch({
+              changes: { from: range.from, to: range.to, insert: newText },
+              selection: EditorSelection.range(
+                range.from,
+                range.from + newText.length,
+              ),
+            });
+          }
+          view.focus();
+        } else {
+          command(view);
+        }
+      });
       dom.appendChild(button);
+      buttons.push({ element: button, format: format ?? null });
     };
 
-    addCommand(i18n.bold || "Bold", icons.bold, bold);
-    addCommand(i18n.italic || "Italic", icons.italic, italic);
+    addCommand(i18n.bold || "Bold", icons.bold, bold, "bold");
+    addCommand(i18n.italic || "Italic", icons.italic, italic, "italic");
     addCommand(
       i18n.strikethrough || "Strikethrough",
       icons.strikethrough,
       strikethrough,
+      "strikethrough",
     );
-    addCommand(i18n.code || "Code", icons.code, code);
-    addCommand(i18n.math || "Math", icons.math, math);
-    addCommand(i18n.link || "Link", icons.link, link);
+    addCommand(i18n.code || "Code", icons.code, code, "code");
+    addCommand(i18n.math || "Math", icons.math, math, "math");
+    addCommand(i18n.link || "Link", icons.link, link, "link");
     addCommand(i18n.quote || "Quote", icons.quote, quote);
 
-    return dom;
+    return { dom, buttons };
   }
 
   class ToolTip implements PluginValue {
     dom: HTMLElement;
+    buttons: ButtonInfo[];
+
     constructor(view: EditorView) {
-      const toolTipDOM = createTooltipDOM(view);
-      this.dom = view.dom.appendChild(toolTipDOM);
+      const { dom, buttons } = createTooltipDOM(view);
+      this.buttons = buttons;
+      this.dom = view.dom.appendChild(dom);
 
       // Prevent right-click from triggering tooltip
       view.dom.addEventListener("contextmenu", () => {
@@ -67,8 +145,30 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
         this.dom.ariaHidden = "true";
       });
     }
+
+    updateActiveStates(view: EditorView) {
+      const range = view.state.selection.main;
+      if (range.empty) {
+        for (const btn of this.buttons) {
+          if (btn.format) btn.element.classList.remove("cm-tooltip-btn-active");
+        }
+        return;
+      }
+      const text = view.state.sliceDoc(range.from, range.to);
+      for (const btn of this.buttons) {
+        if (btn.format) {
+          btn.element.classList.toggle(
+            "cm-tooltip-btn-active",
+            formatUtils[btn.format].test(text),
+          );
+        }
+      }
+    }
+
     update(update: ViewUpdate): void {
       if (update.selectionSet) {
+        this.updateActiveStates(update.view);
+
         update.view.requestMeasure({
           read: (view) => {
             const range = view.state.selection.ranges.find(
@@ -147,6 +247,9 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
         "&:hover": {
           backgroundColor: "#eceef4",
         },
+        "&.cm-tooltip-btn-active": {
+          backgroundColor: "#dde0ec",
+        },
         "& > svg": {
           width: "18px",
           height: "18px",
@@ -163,6 +266,10 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
         backgroundColor: "#1f1f23",
         "& > span:hover": {
           backgroundColor: "#343434",
+        },
+        "& > span.cm-tooltip-btn-active": {
+          backgroundColor: "#3a3a3a",
+          color: "#8ab4f8",
         },
       },
     },

@@ -34,7 +34,7 @@ const italic: Command = (view) => {
           { from: range.from, insert: "*" },
           { from: range.to, insert: "*" },
         ],
-        range: EditorSelection.range(range.from + 1, range.to + 1),
+        range: EditorSelection.range(range.from, range.to + 2),
       };
     })
   );

@@ -24,7 +24,7 @@ const bold: Command = (view) => {
           { from: range.from, insert: "**" },
           { from: range.to, insert: "**" },
         ],
-        range: EditorSelection.range(range.from + 2, range.to + 2),
+        range: EditorSelection.range(range.from, range.to + 4),
       };
     })
   );

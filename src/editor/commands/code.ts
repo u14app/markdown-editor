@@ -56,9 +56,9 @@ const code: Command = (view) => {
           { from: range.to, insert: "`" } // Insert ` after selection
         );
 
-        // New selection range should cover the original text, offset by the first `
-        newSelectionAnchor = range.from + 1;
-        newSelectionHead = range.to + 1; // range.to is the position *after* the selected text, so add 1 for the first `
+        // New selection range includes the backticks to allow easy undo via tooltip
+        newSelectionAnchor = range.from;
+        newSelectionHead = range.to + 2;
       }
 
       // Return the changes and the new selection range for this range
