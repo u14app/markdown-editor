@@ -1,5 +1,5 @@
 import { MagicdownEditor, aiPlugin } from "./editor";
-import { loadSettings, createSettingsUI, type Settings } from "./settings";
+import { loadSettings, createSettingsUI } from "./settings";
 
 const defaultDoc = `# Magicdown Editor
 
@@ -106,9 +106,62 @@ function createEditor(doc?: string) {
       ...(settings.ai.apiBaseUrl && settings.ai.apiKey
         ? [
             aiPlugin({
-              apiBaseUrl: settings.ai.apiBaseUrl,
-              apiKey: settings.ai.apiKey,
-              model: settings.ai.model || undefined,
+              customRequest: async (prompt, onChunk) => {
+                // 用户自行实现请求逻辑
+                const res = await fetch(
+                  `${settings.ai.apiBaseUrl}/chat/completions`,
+                  {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${settings.ai.apiKey}`,
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      model: settings.ai.model,
+                      messages: [
+                        {
+                          role: "system",
+                          content:
+                            "You are an AI editing assistant embedded in a Markdown editor.",
+                        },
+                        { role: "user", content: prompt },
+                      ],
+                      stream: true,
+                    }),
+                  },
+                );
+                // 流式输出
+                const reader = res.body!.getReader();
+                const decoder = new TextDecoder();
+                let fullText = "";
+
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+
+                  const chunk = decoder.decode(value);
+                  const lines = chunk.split("\n").filter((line) => line.trim());
+
+                  for (const line of lines) {
+                    if (line.startsWith("data: ")) {
+                      const data = line.slice(6);
+                      if (data === "[DONE]") continue;
+                      try {
+                        const parsed = JSON.parse(data);
+                        const content =
+                          parsed.choices?.[0]?.delta?.content || "";
+                        if (content) {
+                          fullText += content;
+                          onChunk && onChunk(content);
+                        }
+                      } catch (e) {
+                        // Skip invalid JSON
+                      }
+                    }
+                  }
+                }
+                return fullText;
+              },
               enableTooltip: true,
               enableSlash: true,
               i18n: {

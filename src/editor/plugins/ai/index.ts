@@ -24,6 +24,11 @@ export interface AIPluginConfig {
   apiKey?: string;
   model?: string;
   timeout?: number;
+  headers?: Record<string, string>;
+  customRequest?: (
+    prompt: string,
+    onChunk?: (chunk: string) => void,
+  ) => Promise<string>;
   enableTooltip?: boolean;
   enableSlash?: boolean;
   i18n?: Partial<AIPluginI18n>;
@@ -39,6 +44,8 @@ export function aiPlugin(config: AIPluginConfig = {}): Extension {
       apiKey: config.apiKey,
       model: config.model,
       timeout: config.timeout || 30000,
+      headers: config.headers,
+      customRequest: config.customRequest,
       i18n: config.i18n,
     };
     extensions.push(aiTooltipPlugin(tooltipConfig));
@@ -51,6 +58,8 @@ export function aiPlugin(config: AIPluginConfig = {}): Extension {
       apiKey: config.apiKey,
       model: config.model,
       timeout: config.timeout || 30000,
+      headers: config.headers,
+      customRequest: config.customRequest,
       i18n: config.i18n,
     };
     extensions.push(aiSlashPlugin(slashConfig));

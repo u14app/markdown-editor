@@ -4,6 +4,11 @@ export interface AIConfig {
   apiKey?: string;
   model?: string;
   timeout?: number;
+  headers?: Record<string, string>;
+  customRequest?: (
+    prompt: string,
+    onChunk?: (chunk: string) => void,
+  ) => Promise<string>;
 }
 
 const SYSTEM_PROMPT = `You are an AI editing assistant embedded in a Markdown editor.
@@ -17,10 +22,17 @@ Rules:
 export async function callAI(
   prompt: string,
   config: AIConfig,
-  onChunk?: (chunk: string) => void
+  onChunk?: (chunk: string) => void,
 ): Promise<string> {
+  if (config.customRequest) {
+    return config.customRequest(prompt, onChunk);
+  }
+
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), config.timeout || 30000);
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    config.timeout || 30000,
+  );
 
   try {
     let url: string;
@@ -30,7 +42,7 @@ export async function callAI(
     if (config.apiBaseUrl && config.apiKey) {
       url = `${config.apiBaseUrl}/chat/completions`;
       headers = {
-        "Authorization": `Bearer ${config.apiKey}`,
+        Authorization: `Bearer ${config.apiKey}`,
         "Content-Type": "application/json",
       };
       body = {
@@ -75,7 +87,7 @@ export async function callAI(
         if (done) break;
 
         const chunk = decoder.decode(value);
-        const lines = chunk.split("\n").filter(line => line.trim());
+        const lines = chunk.split("\n").filter((line) => line.trim());
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
