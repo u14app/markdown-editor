@@ -95,10 +95,10 @@ app.appendChild(root);
 
 const settings = loadSettings();
 
-let editor: MagicdownEditor | null = null;
+let editor: MagicdownEditor | null | void = null;
 
-function createEditor(doc?: string) {
-  editor = new MagicdownEditor({
+async function createEditor(doc?: string) {
+  editor = await MagicdownEditor.create({
     root,
     defaultValue: doc || "# Initialize Text",
     theme: settings.theme,
@@ -106,7 +106,7 @@ function createEditor(doc?: string) {
       ...(settings.ai.apiBaseUrl && settings.ai.apiKey
         ? [
             aiPlugin({
-              customRequest: async (prompt, onChunk) => {
+              customRequest: async (prompt, onChunk, signal) => {
                 // 用户自行实现请求逻辑
                 const res = await fetch(
                   `${settings.ai.apiBaseUrl}/chat/completions`,
@@ -128,6 +128,7 @@ function createEditor(doc?: string) {
                       ],
                       stream: true,
                     }),
+                    signal,
                   },
                 );
                 // 流式输出
@@ -191,12 +192,8 @@ function createEditor(doc?: string) {
       },
       tooltip: { bold: "粗体" },
     },
-  });
-
-  editor.create().then(() => {
-    if (!doc) {
-      setTimeout(() => editor?.update(defaultDoc), 2000);
-    }
+  }).then((editor) => {
+    editor.update(defaultDoc);
   });
 }
 

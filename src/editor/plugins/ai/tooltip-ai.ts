@@ -7,6 +7,7 @@ import {
 import { type AIConfig } from "./api";
 import { AIDialog } from "./dialog";
 import * as icons from "../../icons";
+import { isBrowser } from "../../utils/environment";
 
 export interface AITooltipConfig extends AIConfig {
   dialog?: AIDialog;
@@ -22,10 +23,14 @@ export function aiTooltipPlugin(config: AITooltipConfig) {
     constructor(view: EditorView) {
       this.view = view;
       this.dialog = config.dialog || new AIDialog(view, config);
-      setTimeout(() => this.attachToTooltip(), 0);
+      if (isBrowser()) {
+        setTimeout(() => this.attachToTooltip(), 0);
+      }
     }
 
     attachToTooltip() {
+      if (!isBrowser()) return;
+
       const tooltip = this.view.dom.querySelector(".cm-tooltips");
       if (!tooltip) return;
 
@@ -58,7 +63,7 @@ export function aiTooltipPlugin(config: AITooltipConfig) {
     }
 
     update(update: ViewUpdate) {
-      if (!this.dom && update.selectionSet) {
+      if (!this.dom && update.selectionSet && isBrowser()) {
         setTimeout(() => this.attachToTooltip(), 0);
       }
     }
@@ -80,7 +85,6 @@ export function aiTooltipPlugin(config: AITooltipConfig) {
       borderRadius: "8px",
       boxShadow:
         "0px 1px 3px 1px rgba(0,0,0,.15),0px 1px 2px 0px rgba(0,0,0,.3)",
-      padding: "0",
       boxSizing: "border-box",
       overflow: "hidden",
     },
@@ -164,6 +168,41 @@ export function aiTooltipPlugin(config: AITooltipConfig) {
     ".cm-ai-highlight": {
       backgroundColor: "rgba(96, 165, 250, 0.4)",
     },
+    ".cm-ai-loading-toast": {
+      position: "absolute",
+      zIndex: 300,
+      display: "flex",
+      alignItems: "center",
+      gap: "12px",
+      padding: "10px 16px",
+      background: "#f8f9ff",
+      borderRadius: "8px",
+      boxShadow: "0px 2px 8px rgba(0,0,0,0.15)",
+    },
+    ".cm-ai-loading-content": {
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+    },
+    ".cm-ai-loading-text": {
+      fontSize: "14px",
+      color: "#334155",
+    },
+    ".cm-ai-loading-stop": {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "6px 8px",
+      border: "none",
+      borderRadius: "6px",
+      background: "transparent",
+      cursor: "pointer",
+      color: "#64748b",
+      "&:hover": {
+        background: "#e8e9ee",
+        color: "#334155",
+      },
+    },
   });
 
   const dialogDarkTheme = EditorView.theme(
@@ -194,6 +233,19 @@ export function aiTooltipPlugin(config: AITooltipConfig) {
       },
       ".cm-ai-highlight": {
         backgroundColor: "rgba(96, 165, 250, 0.3)",
+      },
+      ".cm-ai-loading-toast": {
+        background: "#1f1f23",
+      },
+      ".cm-ai-loading-text": {
+        color: "#f7fafa",
+      },
+      ".cm-ai-loading-stop": {
+        color: "#94a3b8",
+        "&:hover": {
+          background: "#343434",
+          color: "#f7fafa",
+        },
       },
     },
     { dark: true },

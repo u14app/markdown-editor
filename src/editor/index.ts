@@ -23,6 +23,8 @@ import {
 } from "./plugins/tooltip";
 import { slashPlugin, type I18n as SlashPluginI18n } from "./plugins/slash";
 import { placeholderPlugin } from "./plugins/placeholder";
+import { isBrowser } from "./utils/environment";
+import { diffChanges } from "./utils/diff";
 
 interface I18n {
   tooltip?: Partial<TooltipPluginI18n>;
@@ -58,6 +60,13 @@ export class MagicdownEditor {
   status: "init" | "created" | "destroy";
   theme: "system" | "light" | "dark";
   private themeCompartment = new Compartment();
+
+  static async create(config: EditorConfig): Promise<MagicdownEditor> {
+    const editor = new MagicdownEditor(config);
+    await editor.create();
+    return editor;
+  }
+
   constructor(config: EditorConfig) {
     this.root = config.root;
     this.defaultValue = config.defaultValue;
@@ -73,6 +82,7 @@ export class MagicdownEditor {
   private isDark(): boolean {
     if (this.theme === "dark") return true;
     if (this.theme === "light") return false;
+    if (!isBrowser()) return false;
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   }
   private async getThemeExtension() {
@@ -88,6 +98,11 @@ export class MagicdownEditor {
     }
 
     if (this.status !== "init") return;
+
+    if (!isBrowser()) {
+      console.warn("MagicdownEditor: Skipping initialization in SSR environment");
+      return;
+    }
 
     const editorView = new EditorView({
       doc: this.defaultValue,
@@ -131,9 +146,10 @@ export class MagicdownEditor {
   }
   update(value: string) {
     if (this.view) {
-      this.view.dispatch({
-        changes: { from: 0, to: this.view.state.doc.length, insert: value },
-      });
+      const changes = diffChanges(this.view.state.doc.toString(), value);
+      if (changes) {
+        this.view.dispatch({ changes });
+      }
       return this;
     } else {
       throw new Error("Please use `create()` to create an instance.");

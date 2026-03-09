@@ -51,7 +51,7 @@ export const color = {
 export const lightTheme = EditorView.theme(
   {
     "&": {
-      padding: "6px",
+      padding: "8px",
       color: slate,
       backgroundColor: background,
     },
@@ -122,7 +122,6 @@ export const lightTheme = EditorView.theme(
       },
     },
     ".cm-ai-dialog": {
-      width: "100%",
       color: slate,
       padding: 0,
     },
@@ -153,7 +152,7 @@ export const lightTheme = EditorView.theme(
 export const darkTheme = EditorView.theme(
   {
     "&": {
-      padding: "6px",
+      padding: "8px",
       color: gray,
       backgroundColor: darkBackground,
     },
@@ -224,7 +223,6 @@ export const darkTheme = EditorView.theme(
       },
     },
     ".cm-ai-dialog": {
-      width: "100%",
       color: slate,
       padding: 0,
     },

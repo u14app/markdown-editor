@@ -1,11 +1,15 @@
-import { createElement } from "lucide";
-import { icons } from "lucide";
+import { icons, createElement } from "lucide";
+import { isBrowser } from "../utils/environment";
 
 const toSvg = (icon: any) => {
-  const svg = createElement(icon);
-  svg.setAttribute("width", "18");
-  svg.setAttribute("height", "18");
-  return svg.outerHTML;
+  if (isBrowser()) {
+    const svg = createElement(icon);
+    svg.setAttribute("width", "18");
+    svg.setAttribute("height", "18");
+    return svg.outerHTML;
+  } else {
+    return "";
+  }
 };
 
 export const bold = toSvg(icons.Bold);
@@ -29,3 +33,4 @@ export const penTool = toSvg(icons.PenTool);
 export const fileText = toSvg(icons.FileText);
 export const helpCircle = toSvg(icons.HelpCircle);
 export const send = toSvg(icons.ArrowRight);
+export const stop = toSvg(icons.X);

@@ -8,6 +8,7 @@ import {
   keymap,
 } from "@codemirror/view";
 import * as command from "../commands";
+import { isBrowser } from "../utils/environment";
 
 interface commandText {
   name?: string;
@@ -243,29 +244,35 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
   }
 
   class ToolTip implements PluginValue {
-    dom: HTMLElement;
-    commandItems: { el: HTMLElement; cmd: Command }[];
+    dom: HTMLElement | null = null;
+    commandItems: { el: HTMLElement; cmd: Command }[] = [];
     active = false;
     activeIndex = -1;
     triggerPos: number = 0;
     view: EditorView;
+    private initialized = false;
 
     constructor(view: EditorView) {
       this.view = view;
-      const { dom, commandItems } = createTooltipDOM(view);
+      this.onDocClick = this.onDocClick.bind(this);
+    }
+
+    private initializeDOM() {
+      if (this.initialized || !isBrowser()) return;
+
+      const { dom, commandItems } = createTooltipDOM(this.view);
       this.commandItems = commandItems;
-      this.dom = view.dom.appendChild(dom);
+      this.dom = this.view.dom.appendChild(dom);
       this.dom.style.display = "none";
       this.dom.ariaHidden = "true";
+      this.initialized = true;
 
-      this.onDocClick = this.onDocClick.bind(this);
       document.addEventListener("click", this.onDocClick);
-
       activePlugin = this;
     }
 
     onDocClick(event: MouseEvent): void {
-      if (this.active && !this.dom.contains(event.target as Node)) {
+      if (this.active && this.dom && !this.dom.contains(event.target as Node)) {
         this.view.dispatch({ effects: stopSlashCommandEffect.of(null) });
       }
     }
@@ -302,6 +309,10 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
     }
 
     update(update: ViewUpdate): void {
+      this.initializeDOM();
+
+      if (!this.dom) return;
+
       for (const tr of update.transactions) {
         for (const effect of tr.effects) {
           if (effect.is(startSlashCommandEffect)) {
@@ -340,6 +351,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
           return { coords, shouldShow: this.active };
         },
         write: (measure, view) => {
+          if (!this.dom) return;
+
           if (measure && measure.shouldShow && measure.coords) {
             const { coords } = measure;
 
@@ -381,8 +394,10 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
     }
 
     destroy() {
-      document.removeEventListener("click", this.onDocClick);
-      this.dom.remove();
+      if (isBrowser()) {
+        document.removeEventListener("click", this.onDocClick);
+      }
+      this.dom?.remove();
       if (activePlugin === this) activePlugin = null;
     }
   }

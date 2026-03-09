@@ -3,7 +3,7 @@ import { type ChangeSpec, EditorSelection } from "@codemirror/state";
 
 type ListType = "ul" | "ol" | "todo";
 
-const getListTypeOfLine = (text: string): [ListType, number?] | undefined => {
+export const getListTypeOfLine = (text: string): [ListType, number?] | undefined => {
   text = text && text.trimStart();
 
   if (!text) {

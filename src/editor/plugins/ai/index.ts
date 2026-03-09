@@ -28,6 +28,7 @@ export interface AIPluginConfig {
   customRequest?: (
     prompt: string,
     onChunk?: (chunk: string) => void,
+    signal?: AbortSignal,
   ) => Promise<string>;
   enableTooltip?: boolean;
   enableSlash?: boolean;

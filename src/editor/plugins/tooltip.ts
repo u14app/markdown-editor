@@ -16,6 +16,7 @@ import {
   quote,
 } from "../commands";
 import * as icons from "../icons";
+import { isBrowser } from "../utils/environment";
 
 export type I18n = Record<
   "bold" | "italic" | "strikethrough" | "quote" | "link" | "code" | "math",
@@ -35,7 +36,7 @@ interface FormatUtil {
   remove: (text: string) => string;
 }
 
-const formatUtils: Record<FormatType, FormatUtil> = {
+export const formatUtils: Record<FormatType, FormatUtil> = {
   bold: {
     test: (text) => /\*\*.+?\*\*/s.test(text),
     remove: (text) => text.replace(/\*\*(.+?)\*\*/gs, "$1"),
@@ -131,22 +132,35 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
   }
 
   class ToolTip implements PluginValue {
-    dom: HTMLElement;
-    buttons: ButtonInfo[];
+    dom: HTMLElement | null = null;
+    buttons: ButtonInfo[] = [];
+    view: EditorView;
+    private initialized = false;
 
     constructor(view: EditorView) {
-      const { dom, buttons } = createTooltipDOM(view);
+      this.view = view;
+    }
+
+    private initializeDOM() {
+      if (this.initialized || !isBrowser()) return;
+
+      const { dom, buttons } = createTooltipDOM(this.view);
       this.buttons = buttons;
-      this.dom = view.dom.appendChild(dom);
+      this.dom = this.view.dom.appendChild(dom);
+      this.initialized = true;
 
       // Prevent right-click from triggering tooltip
-      view.dom.addEventListener("contextmenu", () => {
-        this.dom.style.display = "none";
-        this.dom.ariaHidden = "true";
+      this.view.dom.addEventListener("contextmenu", () => {
+        if (this.dom) {
+          this.dom.style.display = "none";
+          this.dom.ariaHidden = "true";
+        }
       });
     }
 
     updateActiveStates(view: EditorView) {
+      if (!this.dom) return;
+
       const range = view.state.selection.main;
       if (range.empty) {
         for (const btn of this.buttons) {
@@ -166,6 +180,10 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
     }
 
     update(update: ViewUpdate): void {
+      this.initializeDOM();
+
+      if (!this.dom) return;
+
       if (update.selectionSet) {
         this.updateActiveStates(update.view);
 
@@ -185,6 +203,8 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
             }
           },
           write: (measure, view) => {
+            if (!this.dom) return;
+
             if (measure && measure.shouldShow && measure.coords) {
               const { coords } = measure;
 
@@ -217,7 +237,7 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
       }
     }
     destroy() {
-      this.dom.remove();
+      this.dom?.remove();
     }
   }
 
@@ -269,7 +289,6 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
         },
         "& > span.cm-tooltip-btn-active": {
           backgroundColor: "#3a3a3a",
-          color: "#8ab4f8",
         },
       },
     },

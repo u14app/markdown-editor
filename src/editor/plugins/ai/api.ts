@@ -8,6 +8,7 @@ export interface AIConfig {
   customRequest?: (
     prompt: string,
     onChunk?: (chunk: string) => void,
+    signal?: AbortSignal,
   ) => Promise<string>;
 }
 
@@ -23,12 +24,11 @@ export async function callAI(
   prompt: string,
   config: AIConfig,
   onChunk?: (chunk: string) => void,
+  controller: AbortController = new AbortController(),
 ): Promise<string> {
   if (config.customRequest) {
-    return config.customRequest(prompt, onChunk);
+    return config.customRequest(prompt, onChunk, controller.signal);
   }
-
-  const controller = new AbortController();
   const timeoutId = setTimeout(
     () => controller.abort(),
     config.timeout || 30000,

@@ -9,6 +9,8 @@ import {
 } from "./state";
 import * as icons from "../../icons";
 import type { AIPluginI18n } from "./index";
+import { isBrowser } from "../../utils/environment";
+import { AILoadingToast } from "./loading-toast";
 
 interface Preset {
   key: keyof AIPluginI18n;
@@ -37,7 +39,7 @@ const tooltipPresets: Preset[] = [
     label: "Make longer",
     icon: icons.listPlus,
     description:
-      "Expand and elaborate on the following text. Add more detail, examples, or context while maintaining the original message and style.",
+      "Expand and elaborate on the following text. Add more detail while maintaining the original message and style.",
   },
   {
     key: "makeShorter",
@@ -96,7 +98,7 @@ const slashPresets: Preset[] = [
 const MAX_CONTEXT_LENGTH = 2000;
 
 export class AIDialog {
-  dom: HTMLElement;
+  dom: HTMLElement | null = null;
   input!: HTMLInputElement;
   commandsContainer!: HTMLElement;
   view: EditorView;
@@ -105,16 +107,29 @@ export class AIDialog {
   clickHandler: (e: MouseEvent) => void;
   savedSelection: { from: number; to: number } | null = null;
   hasSelection = false;
+  private initialized = false;
+  loadingToast: AILoadingToast;
+  lastPosition: { top: number; left: number } | null = null;
+  currentController: AbortController | null = null;
 
-  constructor(view: EditorView, config: AIConfig & { i18n?: Partial<AIPluginI18n> }) {
+  constructor(
+    view: EditorView,
+    config: AIConfig & { i18n?: Partial<AIPluginI18n> },
+  ) {
     this.view = view;
     this.config = config;
     this.i18n = config.i18n;
+    this.loadingToast = new AILoadingToast(view);
     this.clickHandler = (e: MouseEvent) => {
-      if (!this.dom.contains(e.target as Node)) this.hide();
+      if (this.dom && !this.dom.contains(e.target as Node)) this.hide();
     };
+  }
+
+  private initializeDOM() {
+    if (this.initialized || !isBrowser()) return;
     this.dom = this.createDOM();
-    view.dom.appendChild(this.dom);
+    this.view.dom.appendChild(this.dom);
+    this.initialized = true;
   }
 
   createDOM(): HTMLElement {
@@ -126,7 +141,8 @@ export class AIDialog {
     inputWrapper.className = "cm-ai-dialog-input-wrapper";
 
     this.input = document.createElement("input");
-    this.input.placeholder = this.i18n?.askAIPlaceholder || "Ask AI anything...";
+    this.input.placeholder =
+      this.i18n?.askAIPlaceholder || "Ask AI anything...";
     this.input.className = "cm-ai-dialog-input";
     this.input.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -152,7 +168,9 @@ export class AIDialog {
     container.appendChild(this.commandsContainer);
 
     container.addEventListener("mousedown", (e) => e.preventDefault());
-    document.addEventListener("click", this.clickHandler);
+    if (isBrowser()) {
+      document.addEventListener("click", this.clickHandler);
+    }
 
     return container;
   }
@@ -183,6 +201,10 @@ export class AIDialog {
     position: { top: number; left: number },
     selection?: { from: number; to: number },
   ) {
+    this.initializeDOM();
+    if (!this.dom) return;
+
+    this.lastPosition = position;
     this.hasSelection = !!selection;
 
     if (selection) {
@@ -204,14 +226,19 @@ export class AIDialog {
     // Temporarily show to measure height
     this.dom.style.visibility = "hidden";
     this.dom.style.display = "block";
-    this.dom.style.left = "0px";
+
+    // Align dialog with the content area (respecting editor padding)
+    const contentRect = this.view.contentDOM.getBoundingClientRect();
+    this.dom.style.left = `${contentRect.left - editorRect.left + 6}px`;
+    this.dom.style.width = `${contentRect.width - 12}px`;
+
     const dialogHeight = this.dom.offsetHeight;
     this.dom.style.visibility = "";
 
     // Overflow detection: prefer below, flip to above if needed
     const lineBottom = position.top + 28;
     const editorBottom = editorRect.top + this.view.dom.clientHeight;
-    const viewportBottom = window.innerHeight;
+    const viewportBottom = isBrowser() ? window.innerHeight : 0;
 
     if (lineBottom + dialogHeight > Math.min(editorBottom, viewportBottom)) {
       // Flip to above
@@ -226,6 +253,7 @@ export class AIDialog {
   }
 
   hide() {
+    if (!this.dom) return;
     this.dom.style.display = "none";
     this.savedSelection = null;
     this.view.dispatch({
@@ -238,7 +266,9 @@ export class AIDialog {
     if (selection.from === selection.to) return;
 
     const text = this.view.state.sliceDoc(selection.from, selection.to);
-    this.dom.style.display = "none";
+    if (this.dom) {
+      this.dom.style.display = "none";
+    }
 
     let insertPos = selection.from;
     this.view.dispatch({
@@ -246,6 +276,12 @@ export class AIDialog {
       effects: [startAIRequest.of(null), hideAIHighlight.of(null)],
     });
     this.savedSelection = null;
+
+    this.loadingToast.show(() => {
+      if (this.currentController) this.currentController.abort();
+      this.loadingToast.hide();
+      this.view.dispatch({ effects: completeAIRequest.of(null) });
+    }, this.lastPosition || undefined);
 
     try {
       const prompt = `The following are the writing needs of users:
@@ -258,20 +294,26 @@ This is the original text, if it exists:
 ${text}
 </originText>
 `;
+      const controller = new AbortController();
+      this.currentController = controller;
       await callAI(prompt, this.config, (chunk) => {
         this.view.dispatch({
           changes: { from: insertPos, insert: chunk },
         });
         insertPos += chunk.length;
-      });
+      }, controller);
 
+      this.loadingToast.hide();
       this.view.dispatch({ effects: completeAIRequest.of(null) });
     } catch (error) {
+      this.loadingToast.hide();
       this.view.dispatch({
         effects: errorAIRequest.of(
           error instanceof Error ? error.message : "AI request failed",
         ),
       });
+    } finally {
+      this.currentController = null;
     }
   }
 
@@ -284,10 +326,18 @@ ${text}
         ? textBefore.slice(textBefore.length - MAX_CONTEXT_LENGTH)
         : textBefore;
 
-    this.dom.style.display = "none";
+    if (this.dom) {
+      this.dom.style.display = "none";
+    }
 
     let insertPos = head;
     this.view.dispatch({ effects: startAIRequest.of(null) });
+
+    this.loadingToast.show(() => {
+      if (this.currentController) this.currentController.abort();
+      this.loadingToast.hide();
+      this.view.dispatch({ effects: completeAIRequest.of(null) });
+    }, this.lastPosition || undefined);
 
     try {
       const prompt = `The following are the writing needs of users:
@@ -300,25 +350,34 @@ This is the context before the current cursor position:
 ${context}
 </context>
 `;
+      const controller = new AbortController();
+      this.currentController = controller;
       await callAI(prompt, this.config, (chunk) => {
         this.view.dispatch({
           changes: { from: insertPos, insert: chunk },
         });
         insertPos += chunk.length;
-      });
+      }, controller);
 
+      this.loadingToast.hide();
       this.view.dispatch({ effects: completeAIRequest.of(null) });
     } catch (error) {
+      this.loadingToast.hide();
       this.view.dispatch({
         effects: errorAIRequest.of(
           error instanceof Error ? error.message : "AI request failed",
         ),
       });
+    } finally {
+      this.currentController = null;
     }
   }
 
   destroy() {
-    document.removeEventListener("click", this.clickHandler);
-    this.dom.remove();
+    if (isBrowser()) {
+      document.removeEventListener("click", this.clickHandler);
+    }
+    this.dom?.remove();
+    this.loadingToast.destroy();
   }
 }
