@@ -5,7 +5,7 @@
     "module": "ESNext",
 
     "rootDir": "src",
-    "outDir": "lib",
+    "outDir": "dist",
 
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
@@ -33,5 +33,5 @@
     "preserveWatchOutput": true
   },
   "include": ["src"],
-  "exclude": ["src/main.ts", "src/**/*.spec.ts"]
+  "exclude": ["src/main.ts", "src/settings.ts", "src/**/*.spec.ts"]
 }
