@@ -17,20 +17,9 @@ import {
 } from "@codemirror/commands";
 import { markdown } from "@codemirror/lang-markdown";
 import { themeHighlightStyle } from "./theme";
-import {
-  tooltipPlugin,
-  type I18n as TooltipPluginI18n,
-} from "./plugins/tooltip";
-import { slashPlugin, type I18n as SlashPluginI18n } from "./plugins/slash";
-import { placeholderPlugin } from "./plugins/placeholder";
 import { isBrowser } from "./utils/environment";
 import { diffChanges } from "./utils/diff";
 
-interface I18n {
-  tooltip?: Partial<TooltipPluginI18n>;
-  slash?: Partial<SlashPluginI18n>;
-  placeholder?: string;
-}
 export interface EditorConfig {
   root: Element | DocumentFragment | null;
   defaultValue?: string | Text;
@@ -40,7 +29,6 @@ export interface EditorConfig {
   keymaps?: KeyBinding[];
   placeholder?: string;
   theme?: "system" | "light" | "dark";
-  i18n?: I18n;
   onChange?: (value: string) => void;
 }
 
@@ -55,7 +43,6 @@ export class MagicdownEditor {
   languages: LanguageDescription[];
   themes: Extension[];
   keymaps: KeyBinding[];
-  i18n?: I18n;
   onChange?: (value: string) => void;
   status: "init" | "created" | "destroy";
   theme: "system" | "light" | "dark";
@@ -75,7 +62,6 @@ export class MagicdownEditor {
     this.extensions = config.extensions ?? [];
     this.keymaps = config.keymaps ?? [];
     this.theme = config.theme ?? "system";
-    this.i18n = config.i18n;
     if (config.onChange) this.onChange = config.onChange;
     this.status = "init";
   }
@@ -100,7 +86,9 @@ export class MagicdownEditor {
     if (this.status !== "init") return;
 
     if (!isBrowser()) {
-      console.warn("MagicdownEditor: Skipping initialization in SSR environment");
+      console.warn(
+        "MagicdownEditor: Skipping initialization in SSR environment",
+      );
       return;
     }
 
@@ -112,7 +100,7 @@ export class MagicdownEditor {
           codeLanguages: this.languages,
         }),
         history(),
-        placeholder(this.i18n?.placeholder || defaultPlaceholder),
+        placeholder(defaultPlaceholder),
         this.themeCompartment.of(await this.getThemeExtension()),
         ...this.themes,
         ...this.extensions,
@@ -128,9 +116,6 @@ export class MagicdownEditor {
             if (this.onChange) this.onChange(this.value);
           }
         }),
-        tooltipPlugin(this.i18n?.tooltip),
-        slashPlugin(this.i18n?.slash),
-        placeholderPlugin(this.i18n?.placeholder || defaultPlaceholder),
       ],
     });
 
@@ -179,4 +164,14 @@ export class MagicdownEditor {
   }
 }
 
-export { aiPlugin, type AIPluginConfig, type AIPluginI18n } from "./plugins/ai";
+export {
+  aiPlugin as ai,
+  type AIPluginConfig,
+  type AIPluginI18n,
+} from "./plugins/ai";
+export { placeholderPlugin as placeholder } from "./plugins/placeholder";
+export { slashPlugin as slash, type SlashPluginI18n } from "./plugins/slash";
+export {
+  tooltipPlugin as tooltip,
+  type TooltipPluginI18n,
+} from "./plugins/tooltip";

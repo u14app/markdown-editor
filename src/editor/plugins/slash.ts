@@ -15,7 +15,7 @@ interface commandText {
   description?: string;
 }
 
-export type I18n = Record<
+export type SlashPluginI18n = Record<
   | "heading"
   | "list"
   | "advanced"
@@ -47,17 +47,21 @@ interface Command {
 
 export const stopSlashCommandEffect = StateEffect.define();
 
-export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
+export function slashPlugin({
+  i18n,
+}: {
+  i18n?: Partial<SlashPluginI18n>;
+}): Extension {
   const startSlashCommandEffect = StateEffect.define<{ pos: number }>();
 
   const exampleCommands: Command[] = [
     {
-      name: i18n.heading?.name || "Heading",
+      name: i18n?.heading?.name || "Heading",
       type: "text",
     },
     {
-      name: i18n.h1?.name || "Heading 1",
-      description: i18n.h1?.description || "Insert Heading 1",
+      name: i18n?.h1?.name || "Heading 1",
+      description: i18n?.h1?.description || "Insert Heading 1",
       type: "command",
       execute: (view: EditorView) => {
         command.h1(view);
@@ -65,8 +69,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.h2?.name || "Heading 2",
-      description: i18n.h2?.description || "Insert Heading 2",
+      name: i18n?.h2?.name || "Heading 2",
+      description: i18n?.h2?.description || "Insert Heading 2",
       type: "command",
       execute: (view: EditorView) => {
         command.h2(view);
@@ -74,8 +78,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.h3?.name || "Heading 3",
-      description: i18n.h3?.description || "Insert Heading 3",
+      name: i18n?.h3?.name || "Heading 3",
+      description: i18n?.h3?.description || "Insert Heading 3",
       type: "command",
       execute: (view: EditorView) => {
         command.h3(view);
@@ -83,8 +87,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.h4?.name || "Heading 4",
-      description: i18n.h4?.description || "Insert Heading 4",
+      name: i18n?.h4?.name || "Heading 4",
+      description: i18n?.h4?.description || "Insert Heading 4",
       type: "command",
       execute: (view: EditorView) => {
         command.h4(view);
@@ -92,8 +96,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.h5?.name || "Heading 5",
-      description: i18n.h5?.description || "Insert Heading 5",
+      name: i18n?.h5?.name || "Heading 5",
+      description: i18n?.h5?.description || "Insert Heading 5",
       type: "command",
       execute: (view: EditorView) => {
         command.h5(view);
@@ -101,8 +105,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.h6?.name || "Heading 6",
-      description: i18n.h6?.description || "Insert Heading 6",
+      name: i18n?.h6?.name || "Heading 6",
+      description: i18n?.h6?.description || "Insert Heading 6",
       type: "command",
       execute: (view: EditorView) => {
         command.h6(view);
@@ -110,12 +114,12 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.list?.name || "List",
+      name: i18n?.list?.name || "List",
       type: "text",
     },
     {
-      name: i18n.ul?.name || "Bullet List",
-      description: i18n.ul?.description || "Insert Bullet List Item",
+      name: i18n?.ul?.name || "Bullet List",
+      description: i18n?.ul?.description || "Insert Bullet List Item",
       type: "command",
       execute: (view: EditorView) => {
         command.ul(view);
@@ -123,8 +127,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.ol?.name || "Ordered List",
-      description: i18n.ol?.description || "Insert Ordered List Item",
+      name: i18n?.ol?.name || "Ordered List",
+      description: i18n?.ol?.description || "Insert Ordered List Item",
       type: "command",
       execute: (view: EditorView) => {
         command.ol(view);
@@ -132,8 +136,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.todo?.name || "Todo List",
-      description: i18n.todo?.description || "Insert Todo List Item",
+      name: i18n?.todo?.name || "Todo List",
+      description: i18n?.todo?.description || "Insert Todo List Item",
       type: "command",
       execute: (view: EditorView) => {
         command.todo(view);
@@ -141,12 +145,12 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.advanced?.name || "Advanced",
+      name: i18n?.advanced?.name || "Advanced",
       type: "text",
     },
     {
-      name: i18n.link?.name || "Link",
-      description: i18n.link?.description || "Insert Link",
+      name: i18n?.link?.name || "Link",
+      description: i18n?.link?.description || "Insert Link",
       type: "command",
       execute: (view: EditorView) => {
         command.link(view);
@@ -154,8 +158,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.image?.name || "Image",
-      description: i18n.image?.description || "Insert Image",
+      name: i18n?.image?.name || "Image",
+      description: i18n?.image?.description || "Insert Image",
       type: "command",
       execute: (view: EditorView) => {
         command.image(view);
@@ -163,8 +167,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.code?.name || "Code Block",
-      description: i18n.code?.description || "Insert Code Block",
+      name: i18n?.code?.name || "Code Block",
+      description: i18n?.code?.description || "Insert Code Block",
       type: "command",
       execute: (view: EditorView) => {
         command.code(view);
@@ -172,8 +176,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.math?.name || "Math Block",
-      description: i18n.math?.description || "Insert Math Block",
+      name: i18n?.math?.name || "Math Block",
+      description: i18n?.math?.description || "Insert Math Block",
       type: "command",
       execute: (view: EditorView) => {
         command.math(view);
@@ -181,8 +185,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.table?.name || "Table",
-      description: i18n.table?.description || "Insert Table",
+      name: i18n?.table?.name || "Table",
+      description: i18n?.table?.description || "Insert Table",
       type: "command",
       execute: (view: EditorView) => {
         command.table(view);
@@ -190,8 +194,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.quote?.name || "Quote",
-      description: i18n.quote?.description || "Insert Quote",
+      name: i18n?.quote?.name || "Quote",
+      description: i18n?.quote?.description || "Insert Quote",
       type: "command",
       execute: (view: EditorView) => {
         command.quote(view);
@@ -199,8 +203,8 @@ export function slashPlugin(i18n: Partial<I18n> = {}): Extension {
       },
     },
     {
-      name: i18n.horizontal?.name || "Horizontal",
-      description: i18n.horizontal?.description || "Insert Horizontal",
+      name: i18n?.horizontal?.name || "Horizontal",
+      description: i18n?.horizontal?.description || "Insert Horizontal",
       type: "command",
       execute: (view: EditorView) => {
         command.horizontal(view);

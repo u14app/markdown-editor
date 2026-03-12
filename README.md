@@ -15,11 +15,22 @@ npm install @xiangfa/mdeditor
 ### First editor
 
 ```javascript
-import { MagicdownEditor } from "@xiangfa/mdeditor";
+import {
+  MagicdownEditor,
+  tooltipPlugin,
+  slashPlugin,
+  placeholderPlugin,
+} from "@xiangfa/mdeditor";
 
 const editor = new MagicdownEditor({
   root,
   defaultValue: defaultDoc,
+  theme: "system",
+  extensions: [
+    tooltipPlugin({ bold: "Bold" }),
+    slashPlugin({ heading: { name: "Heading" } }),
+    placeholderPlugin("Please enter text..."),
+  ],
 });
 
 editor.create().then(({ view }) => {
@@ -38,8 +49,7 @@ interface EditorConfig {
   defaultValue?: string | Text;
   languages?: LanguageDescription[];
   themes?: Extension[];
-  extensions?: Extension[];
+  extensions?: Extension[]; // 手动传入插件/扩展
   keymaps?: KeyBinding[];
-  i18n?: I18n;
 }
 ```

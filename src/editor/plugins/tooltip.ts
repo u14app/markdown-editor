@@ -18,7 +18,7 @@ import {
 import * as icons from "../icons";
 import { isBrowser } from "../utils/environment";
 
-export type I18n = Record<
+export type TooltipPluginI18n = Record<
   "bold" | "italic" | "strikethrough" | "quote" | "link" | "code" | "math",
   string
 >;
@@ -68,7 +68,11 @@ interface ButtonInfo {
   format: FormatType | null;
 }
 
-export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
+export function tooltipPlugin({
+  i18n,
+}: {
+  i18n?: Partial<TooltipPluginI18n>;
+}): Extension {
   function createTooltipDOM(view: EditorView): {
     dom: HTMLElement;
     buttons: ButtonInfo[];
@@ -115,18 +119,18 @@ export function tooltipPlugin(i18n: Partial<I18n> = {}): Extension {
       buttons.push({ element: button, format: format ?? null });
     };
 
-    addCommand(i18n.bold || "Bold", icons.bold, bold, "bold");
-    addCommand(i18n.italic || "Italic", icons.italic, italic, "italic");
+    addCommand(i18n?.bold || "Bold", icons.bold, bold, "bold");
+    addCommand(i18n?.italic || "Italic", icons.italic, italic, "italic");
     addCommand(
-      i18n.strikethrough || "Strikethrough",
+      i18n?.strikethrough || "Strikethrough",
       icons.strikethrough,
       strikethrough,
       "strikethrough",
     );
-    addCommand(i18n.code || "Code", icons.code, code, "code");
-    addCommand(i18n.math || "Math", icons.math, math, "math");
-    addCommand(i18n.link || "Link", icons.link, link, "link");
-    addCommand(i18n.quote || "Quote", icons.quote, quote);
+    addCommand(i18n?.code || "Code", icons.code, code, "code");
+    addCommand(i18n?.math || "Math", icons.math, math, "math");
+    addCommand(i18n?.link || "Link", icons.link, link, "link");
+    addCommand(i18n?.quote || "Quote", icons.quote, quote);
 
     return { dom, buttons };
   }

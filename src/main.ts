@@ -1,4 +1,4 @@
-import { MagicdownEditor, aiPlugin } from "./editor";
+import { MagicdownEditor, ai, tooltip, slash, placeholder } from ".";
 import { loadSettings, createSettingsUI } from "./settings";
 
 const defaultDoc = `# Magicdown Editor
@@ -103,9 +103,21 @@ async function createEditor(doc?: string) {
     defaultValue: doc || "# Initialize Text",
     theme: settings.theme,
     extensions: [
+      tooltip({
+        i18n: {
+          bold: "粗体",
+        },
+      }),
+      slash({
+        i18n: {
+          heading: { name: "标题" },
+          h1: { name: "一级标题", description: "插入一级标题" },
+        },
+      }),
+      placeholder("请输入文本..."),
       ...(settings.ai.apiBaseUrl && settings.ai.apiKey
         ? [
-            aiPlugin({
+            ai({
               customRequest: async (prompt, onChunk, signal) => {
                 // 用户自行实现请求逻辑
                 const res = await fetch(
@@ -184,14 +196,6 @@ async function createEditor(doc?: string) {
         : []),
     ],
     onChange: () => {},
-    i18n: {
-      placeholder: "请输入文本...",
-      slash: {
-        heading: { name: "标题" },
-        h1: { name: "一级标题", description: "插入一级标题" },
-      },
-      tooltip: { bold: "粗体" },
-    },
   }).then((editor) => {
     editor.update(defaultDoc);
   });
